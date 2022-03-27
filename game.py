@@ -64,7 +64,6 @@ def all_reset():
     #sv.menu_mod = []
     sv.character = 0
     sv.cur_screen = 0
-    sv.stage_fun -= 1
     sv.stage_line = 0
     sv.stage_cline = 0
     sv.stage_repeat_count = 0
@@ -103,7 +102,6 @@ def play_game():
     global screen
     music_and_sfx_volume(st.music_volume,st.sfx_volume)    
     count = 0
-    start_fun = [0,0]
     bgx = 0
 
     ################################################# 
@@ -122,8 +120,6 @@ def play_game():
                     exit()
                 if ev.type == pygame.KEYDOWN:    
                     if not sv.pause:                
-                        if ev.key == pygame.K_F4:
-                            st.full_on = False if st.full_on == True else True
                         if ev.key == pygame.K_ESCAPE and sv.frame_count >= 60:
                             s_pause.play()
                             sv.pause = True                      
@@ -132,7 +128,7 @@ def play_game():
                                 sv.beams_group.add(sv.Beam(get_new_pos(sv.player.pos,5),4))
                             if sv.player.shoot_gatcha == 0:
                                 sv.player.shoot_gatcha = 20                                                            
-                        if ev.key == pygame.K_c and sv.player.skill_list[sv.player.skill_pointer].pp > 0:
+                        if (ev.key == pygame.K_x or ev.key == pygame.K_c) and sv.player.skill_list[sv.player.skill_pointer].pp > 0:
                             sv.player.skill_list[sv.player.skill_pointer].pp -= 1       
                             sv.skill_activating.append(sv.Skill_Core(sv.player.skill_list[sv.player.skill_pointer].num,sv.player.skill_list[sv.player.skill_pointer].cool))
                         if ev.key == pygame.K_d:
@@ -150,10 +146,11 @@ def play_game():
                             s_select.play()
                             if sv.curser == 0: 
                                 if sv.pause_lock:
-                                    sv.curser = 1
-                                    start_fun[1] += 1
-                                    if start_fun[1] >= 9:
+                                    sv.curser = 1                                   
+                                    if sv.stage_challenge+1 >= len(sv.stages[sv.stage_fun-1]):
                                         sv.curser = 2
+                                    else:
+                                        sv.stage_challenge += 1
                                 elif sv.player.died:
                                     sv.curser = 1
                                 else:
@@ -175,8 +172,6 @@ def play_game():
                                 sv.beams_group = pygame.sprite.Group()
                                 sv.effect_group = pygame.sprite.Group()
                                 sv.item_group = pygame.sprite.Group()
-                                sv.stage_fun = start_fun[0]
-                                sv.stage_challenge = start_fun[1]
                                 sv.stage_line = 0
                                 sv.stage_cline = 0
                                 sv.stage_repeat_count = 0
@@ -189,31 +184,23 @@ def play_game():
                                 st.score = 0
                                 sv.skill_activating = []
                                 sv.pause = False    
-                                sv.levelup = False                    
+                                sv.levelup = False  
+                                sv.stage_fun -= 1
+                                sv.stage_playing = sv.stages[sv.stage_fun][sv.stage_challenge]             
                             if sv.curser == 2: 
+                                sv.stage_fun -= 1
                                 sv.pause_lock = False
                                 st.game_restart = True
                         if ev.key == pygame.K_ESCAPE:
                             if not sv.pause_lock:
                                 sv.pause = False
-
             # 재시작이면 반복 나가기
             if st.game_restart:
                 sv.frame_count = 0
                 break
             
             # 탄에 박았는가
-            hit_list = pygame.sprite.spritecollide(sv.player_hitbox, sv.spr, not sv.player.godmod, pygame.sprite.collide_circle)
-            beam_collide = pygame.sprite.groupcollide(sv.beams_group, sv.enemy_group, False, False, pygame.sprite.collide_circle)
-            if beam_collide.items():
-                for beam, enemy in beam_collide.items():                 
-                    for i in range(0,len(enemy)): 
-                        if not beam.died:
-                            enemy[i].health -= beam.damage
-                            if beam.num == 4 and enemy[i].health <= 0:
-                                sv.player.skill_list[sv.player.skill_pointer] = enemy[i].skill   
-                                st.score+=st.score_setting[4] 
-                            beam.died = True                       
+            hit_list = pygame.sprite.spritecollide(sv.player_hitbox, sv.spr, not sv.player.godmod, pygame.sprite.collide_circle)                  
             boss_collide = pygame.sprite.spritecollide(sv.boss, sv.beams_group, False, pygame.sprite.collide_circle)
             boss2_collide = pygame.sprite.spritecollide(sv.boss2, sv.beams_group, False, pygame.sprite.collide_circle)
             # 연산 업데이트
@@ -239,7 +226,6 @@ def play_game():
                 if not st.bkgd_list == []:
                     for i in st.bkgd_list:i.update()
             # 그리기 시작
-            #배경 스크롤
             if sv.frame_count >= 60:
                 if not sv.pause:
                     background_scroll() 
@@ -290,8 +276,7 @@ def play_game():
                         else:menu.blit(menu_img,(0,0),(160,112+32*i,160,32))
                         pause_menu.blit(menu,(0,200+32*i))
                     screen.blit(pygame.transform.scale2x(pause_menu),(0,0))     
-            else:
-                pass 
+            else:pass 
             
             pygame.display.flip()       
         if sv.cur_screen == 0:
@@ -303,9 +288,7 @@ def play_game():
             for ev in pygame.event.get():
                 if ev.type == pygame.QUIT: # 게임끄기
                     sv.play = False
-                if ev.type == pygame.KEYDOWN: 
-                    if ev.key == pygame.K_F4:
-                        sv.st.full_on = False if st.full_on == True else True  
+                if ev.type == pygame.KEYDOWN:   
                     if ev.key == pygame.K_UP:
                         sv.curser = curser_max if sv.curser == 0 else sv.curser - 1 # 커서위로
                         st.s_ok.play()
@@ -328,21 +311,21 @@ def play_game():
                                 pygame.mixer.music.stop()
                                 s_select.play()
                                 sv.character = 0
-                                sv.player.power = 400
-                                sv.cur_screen = 1  
+                                sv.player.power = 400                                  
                                 sv.stage_challenge = sv.curser
-                                start_fun = [sv.stage_fun,sv.stage_challenge]
+                                sv.stage_playing = sv.stages[sv.stage_fun][sv.stage_challenge]
                                 sv.frame_count = 0
                                 sv.curser = 0
+                                sv.cur_screen = 1
                                 break    
                             if ev.key == pygame.K_RIGHT:
                                 s_ok.play()
                                 sv.stage_fun += 1 
-                                if sv.stage_fun == 10: sv.stage_fun = 0                             
+                                if sv.stage_fun == len(sv.stages): sv.stage_fun = 0                             
                             if ev.key == pygame.K_LEFT:
                                 s_ok.play()
                                 sv.stage_fun -= 1 
-                                if sv.stage_fun == -1: sv.stage_fun = 9                                
+                                if sv.stage_fun == -1: sv.stage_fun = len(sv.stages)-1                            
                             if ev.key == pygame.K_x or ev.key == pygame.K_ESCAPE:
                                 s_cancel.play()
                                 sv.curser = 0
@@ -416,14 +399,15 @@ def play_game():
                     render_layer.blit(menu,(ui_x,ui_y+32*i))
             if sv.select_mod == 1: # 다음옴션
                 if sv.menu_mod[0] == 0: # 시작>난이도 정하기
-                    curser_max = 8
+                    curser_max = len(sv.stages[sv.stage_fun])-1
+                    if sv.curser > curser_max: sv.curser = curser_max
                     text_color = (0,0,255)
                     text1 = score_font.render("Day"+str(sv.stage_fun+1), True, text_color)
                     render_layer.blit(text1,(240,50))
-                    for i in range(1,10):
-                        text_color = (255,0,255) if i-1 == sv.curser else (0,0,255)
-                        text1 = score_font.render(str(sv.stage_fun+1) +"-"+str(i), True, text_color)
-                        render_layer.blit(text1,(240,60+25*i))                   
+                    for i in range(0,len(sv.stages[sv.stage_fun])):
+                        text_color = (255,0,255) if i == sv.curser else (0,0,255)
+                        text1 = score_font.render(str(sv.stage_fun+1) +"-"+str(i+1), True, text_color)
+                        render_layer.blit(text1,(240,60+25*(i+1)))                   
                 if sv.menu_mod[0] == 1: # 설명
                     font = pygame.font.Font(FONT_2, 30)
                     pygame.draw.rect(render_layer, (0,0,0), (20,20,WIDTH-40,HEIGHT-40), width=0)
@@ -458,7 +442,6 @@ def play_game():
 
             if sv.cur_screen == 0:screen.blit(pygame.transform.scale2x(render_layer),(0,0))
             pygame.display.flip()
-
         # 전체화면
         if st.full_on != sv.cur_full_mod:
             if st.full_on:

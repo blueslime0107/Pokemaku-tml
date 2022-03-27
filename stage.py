@@ -34,18 +34,26 @@ def game_defalt_setting(fun): # 게임 스테이지 배경 정하기
     st.bkgd_list = []
     ##############################################
     if fun == 1:
-        st.bkgd_list.append(sv.Back_Ground(bg_image,(0,0,1080,240),1,0,0))
-        st.bkgd_list.append(sv.Back_Ground(bg_image,(0,240,1080,240),2,1,240))
-        st.bkgd_list.append(sv.Back_Ground(bg_image,(0,480,1080,240),3,2,480))
+        st.bkgd_list.append(sv.Back_Ground(bg_image,(0,0,540,120),1))
+        st.bkgd_list.append(sv.Back_Ground(bg_image,(0,120,540,120),2))
+        st.bkgd_list.append(sv.Back_Ground(bg_image,(0,240,540,120),3))
+        
     if fun == 2:
-        st.bkgd_list.append(sv.Back_Ground(bg_image,(0,360,540,232),2,6,0))
-        st.bkgd_list.append(sv.Back_Ground(bg_image,(0,592,540,128),3,7,232))
+        st.bkgd_list.append(sv.Back_Ground(bg_image,(0,1080,540,187),2))
+        st.bkgd_list.append(sv.Back_Ground(bg_image,(540,1170,540,97),3))
+        st.bkgd_list.append(sv.Back_Ground(bg_image,(0,1267,540,173),4,))
+        st.bkgd_list.append(sv.Back_Ground(bg_image,(540,1080,540,90),5,))
+        st.bkgd_list.append(sv.Back_Ground(bg_image,(540,1350,640,90),5,))
+        
     if fun == 3:
+        st.bkgd_list.append(sv.Back_Ground(bg_image,(540,360,540,75),0.1))
+        st.bkgd_list.append(sv.Back_Ground(bg_image,(0,390,540,90),2))
+        st.bkgd_list.append(sv.Back_Ground(bg_image,(0,480,540,30),3))
+        st.bkgd_list.append(sv.Back_Ground(bg_image,(0,510,540,90),4))
+        st.bkgd_list.append(sv.Back_Ground(bg_image,(0,600,540,120),5))
+    if fun == 4:
         st.bkgd_list.append(sv.Back_Ground(bg_image,(0,720,540,126),5,8,0))
         st.bkgd_list.append(sv.Back_Ground(bg_image,(540,776,540,304),7,9,118))
-    if fun == 4:
-        st.bkgd_list.append(sv.Back_Ground(bg_image,(0,1080,720,360),10,10))
-        st.bkgd_list.append(sv.Back_Ground(bg_image,(540,1080,540,360),8,11))
     if fun == 5:
         st.bkgd_list.append(sv.Back_Ground(bg_image,(0,1440,540,72),7,8,0))
         st.bkgd_list.append(sv.Back_Ground(bg_image,(0,1440+72,540,72),5,8,72))
@@ -147,13 +155,17 @@ def boss_attack(num,count,pos,ready,boss):
                 count = 0       
         if num == 3: # 파이어
             if count > 60:
-                if when_time(count,61): s_lazer1.play()
+                if when_time(count,61): 
+                    s_lazer1.play()
+                    boss.list[0] = sv.player.pos
                 if while_time(count,1):
-                    bullet(pos,look_at_player(pos)+10,20,0,1) 
-                    bullet(pos,look_at_player(pos)-10,20,0,1)   
+                    bullet(pos,look_at_point(pos,boss.list[0])+10,20,0,1) 
+                    bullet(pos,look_at_point(pos,boss.list[0])-10,20,0,1)   
                 if while_time(count,20):
                     bullet_effect(s_tan1,1,pos)
                     bullet(pos,randint(-10,10)+look_at_player(pos),5,15,1) 
+                if when_time(count,180):
+                    set_go_boss(4,choice([-90,90]),60,boss)
             if count > 240:
                 count = 0   
         if num == 6: # 라이코
@@ -312,8 +324,6 @@ def bullet_type(self,mod,sub):
                 self.speed -= 0.1
             elif self.count <= 90:
                 self.speed = 0
-            elif self.count <= 91:
-                sbullet(self.pos,self.direction,4,4,3)
             else:
                 self.speed = 6
     if mod == 2:
@@ -483,34 +493,6 @@ def stage_manager():
         sv.stage_end -= 1
 
 def stage_play():
-    if sv.stage_fun == 1:
-        if sv.stage_challenge == 0: boss_spawn(1,2) 
-        if sv.stage_challenge == 1: boss_spawn(3,1) 
-        if sv.stage_challenge == 2: boss_spawn(2,3) 
-        if sv.stage_challenge == 3: boss_spawn(6,7) 
-        if sv.stage_challenge == 4: boss_spawn(7,8) 
-        if sv.stage_challenge == 5: boss_spawn(8,6) 
-        if sv.stage_challenge == 6: boss_spawn(1,8) 
-        if sv.stage_challenge == 7: boss_spawn(2,6) 
-        if sv.stage_challenge == 8: boss_spawn(3,7) 
-    if sv.stage_fun == 2:
-        if sv.stage_challenge == 0: boss_spawn(12,13) 
-        if sv.stage_challenge == 1: boss_spawn(13,27) 
-        if sv.stage_challenge == 2: boss_spawn(14,28) 
-        if sv.stage_challenge == 3: boss_spawn(12,27) 
-        if sv.stage_challenge == 4: boss_spawn(14,13) 
-        if sv.stage_challenge == 5: boss_spawn(14,12)  
-        if sv.stage_challenge == 6: boss_spawn(12,28) 
-        if sv.stage_challenge == 7: boss_spawn(28,13) 
-        if sv.stage_challenge == 8: boss_spawn(14,27)
-    if sv.stage_fun == 3:
-        if sv.stage_challenge == 0: boss_spawn(15,16) 
-        if sv.stage_challenge == 1: boss_spawn(16,30) 
-        if sv.stage_challenge == 2: boss_spawn(22,23) 
-        if sv.stage_challenge == 3: boss_spawn(23,24) 
-        if sv.stage_challenge == 4: boss_spawn(22,24)
-        if sv.stage_challenge == 5: boss_spawn(15,22) 
-        if sv.stage_challenge == 6: boss_spawn(24,30)  
-        if sv.stage_challenge == 7: boss_spawn(23,16) 
-        if sv.stage_challenge == 8: boss_spawn(30,15) 
+    boss_spawn(sv.stage_playing[0],sv.stage_playing[1])
+
         

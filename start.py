@@ -368,7 +368,7 @@ bkgd_list = []
 score_font = pygame.font.Font(FONT_1, 25)
 font1 = pygame.font.Font(FONT_1, 18)
 #쌀점,경험치,고속주행,그레이즈, 포획, 스펠클리어
-score_setting = (100,2000,1,200,100000,777777,0,0,0)
+score_setting = (1000,2000,1,200,50000,777777,0,0,0)
 bullet_border_wide = 200
 bullet_border = Rect(0-bullet_border_wide, 0-bullet_border_wide, WIDTH*2 + bullet_border_wide, HEIGHT*2 + bullet_border_wide)
 small_border = Rect(0, 0, WIDTH*2, HEIGHT*2)

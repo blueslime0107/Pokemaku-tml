@@ -71,36 +71,31 @@ def background_scroll():
     if st.bkgd_list:
         for image in st.bkgd_list:
             rel_x = image.x % WIDTH
-            if not image.appear:
-                render_layer.blit(image.image, (rel_x - WIDTH,image.y))
+            render_layer.blit(image.image, (rel_x - WIDTH,image.y))
             if rel_x < WIDTH:
                 render_layer.blit(image.image,(rel_x,image.y))
-            if image.appear and rel_x == 0: 
-                st.bkgd_list[st.bkgd_list.index(image)].appear = False
-                if image.num == 4:delete_background(2)
-                if image.num == 5:delete_background(1)
-                if image.num == 8:delete_background(7)
-                if image.num == 9:delete_background(6)
+
+
 def delete_background(num):
     for img in st.bkgd_list:
         if img.num == num:
             del st.bkgd_list[st.bkgd_list.index(img)]
 def set_go_boss(speed,dir,count,boss):
-    if dir > 180: 180-dir
+    if dir > 180: dir = 180-dir
     if boss.move_time <= 0:
         if not boss.box_disable:
-            if boss.pos[0] < sv.boss_movebox.x+boss.rect.width:
-                if big_small(dir,90,180) or big_small(dir,-180,-90):dir = -dir+180 
-                if abs(dir) == 180: dir = 0
-            if boss.pos[0] > sv.boss_movebox.x+sv.boss_movebox.width-boss.rect.width:
-                if big_small(dir,270,360) or big_small(dir,0,90):-dir+180 
-                if abs(dir) == 0: dir = 180
-            if boss.pos[1] < sv.boss_movebox.y+boss.rect.height:
-                if big_small(dir,0,180):-dir+180 
-                if abs(dir) == -90: dir = 90
-            if boss.pos[1] > sv.boss_movebox.y+sv.boss_movebox.height-boss.rect.height:
-                if big_small(dir,-180,0):-dir+180 
-                if abs(dir) ==90: dir = -90            
+            if boss.pos[0] < sv.boss_movebox.x+64:
+                if big_small(dir,90,180) or big_small(dir,-180,-90):dir = 180-dir 
+                if dir > 180: dir = 180-dir
+            if boss.pos[0] > sv.boss_movebox.right-64:
+                if big_small(dir,-90,0) or big_small(dir,0,90): dir = 180-dir  
+                if dir > 180: dir = 180-dir
+            if boss.pos[1] < sv.boss_movebox.y+64:
+                if big_small(dir,-180,0): dir = -dir
+                if dir > 180: dir = 180-dir
+            if boss.pos[1] > sv.boss_movebox.bottom-64:
+                if big_small(dir,0,180): dir = -dir        
+                if dir > 180: dir = 180-dir    
         boss.move_dir = dir
         boss.move_speed = speed
         boss.move_time = count

@@ -6,7 +6,7 @@ from start import render_layer,bullets, WIDTH, HEIGHT, small_border, FONT_1, fon
 from start import magic_circle_sprite, white_circle, died_white_circle,bullet_erase,boss_circle,bullet_size
 from start import s_boom, s_cat1, s_ch0, s_ch2, s_damage0, s_damage1, s_enedead, s_enep1, s_graze, s_item0, s_pldead, s_plst0, s_tan1, s_tan2,s_piyo,s_shoot, s_nodam
 from start import item_channel, plst_channel, graze_channel ,enemy_boom_channel, black_screen, enemy_died_circle, bullet_taning, died_channel, damage_channel
-from stage import bullet_type, boss_attack, magic_type
+from stage import bullet_type, boss_attack, magic_type, stage_play
 from start import WIDTH, HEIGHT
 from norm_func import *
 from spec_func import *
@@ -178,7 +178,7 @@ class Tittle():
         self.stage = value
         self.count = 999
         self.save = 1
-        self.name1 = "Stage 1"
+        self.name1 = " 1"
         self.name2 = "드넓은 초원"
         self.defalt = ["앗!","다!"]
         self.pos = [st.WIDTH//2+50,st.HEIGHT//2]
@@ -457,8 +457,11 @@ class Boss_Enemy(pygame.sprite.Sprite):
                     if not beam.died:
                         if self.health > 1:
                             self.health -= beam.damage
+                            if beam.num == 4: st.score += st.score_setting[4]
                             if self.health <= 0: self.health = 1
-                        if self.health < 10 and beam.num == 4:self.health -= beam.damage
+                        if self.health < 10 and beam.num == 4:
+                            self.health -= beam.damage
+                            st.score += st.score_setting[4]
                         if self.health < 10:damage_channel.play(s_nodam) 
                         else:
                             if self.health/self.max_health < 0.25:damage_channel.play(s_damage1) 
@@ -625,7 +628,8 @@ class Spell_Obj(pygame.sprite.Sprite):
         if self.num == 10:
             for bulls in spr.sprites():
                 if distance(self.pos,(bulls.pos[0]//2,bulls.pos[1]//2)) <= 40:
-                    bulls.kill()
+                    if not bulls.shape[0] == 19:
+                        bulls.kill()
                     self.direction += 1
             if self.direction >= 30:
                 self.kill()
@@ -1174,15 +1178,15 @@ class Under_PI():
             if player.godmod: drawArc(render_layer, health_color(player.health/player.max_health), psi, 55, 5, 360*player.before_health/player.max_health,120)
             drawArc(render_layer, health_color(player.health/player.max_health), psi, 55, 5, 360*player.health/player.max_health,120 if not player.godmod else 255)
 class Back_Ground():
-    def __init__(self, img, rect, speed, num, y=0,not_appear=False):
+    def __init__(self, img, rect, speed):
         image = pygame.Surface((rect[2],rect[3]), pygame.SRCALPHA)
         image.blit(img, (0,0), rect)
         self.image = image
         self.speed = speed
-        self.num = num
         self.x = 0
-        self.y = y
-        self.appear = not_appear
+        self.y = rect[1]
+        if self.y >= 360:
+            self.y -= 360*(self.y // 360)
     def update(self):
         self.x -= self.speed
 
@@ -1240,4 +1244,8 @@ player.skill_list.append(Skill(8,2,"얼리진 않는","냉동빔",2,90,80))
 player.skill_list.append(Skill(10,0,"충격 흡수량 최대","코튼가드",3,5,50))
 player.skill_list.append(Skill(17,10,"경계를 뚫는?!","땅굴파기",5,120,80))
 
+stages = [[(1,2),(3,1),(2,3),(6,7),(7,8),(8,6),(1,8),(2,6),(3,7)],\
+        [(12,13),(13,27) ,(14,28),(12,27),(14,13),(14,12),(12,28),(28,13),(14,27)],\
+        [(15,16),(16,30),(22,23),(23,24),(22,24),(15,22),(24,30) ,(23,16),(30,15),(30,22) ]]
 
+stage_playing = (1,2)

@@ -6,7 +6,8 @@ from start import render_layer,bullets, WIDTH, HEIGHT, small_border, FONT_1, fon
 from start import magic_circle_sprite, white_circle, died_white_circle,bullet_erase,boss_circle,bullet_size
 from start import s_boom, s_cat1, s_ch0, s_ch2, s_damage0, s_damage1, s_enedead, s_enep1, s_graze, s_item0, s_pldead, s_plst0, s_tan1, s_tan2,s_piyo,s_shoot, s_nodam
 from start import item_channel, plst_channel, graze_channel ,enemy_boom_channel, black_screen, enemy_died_circle, bullet_taning, died_channel, damage_channel
-from stage import bullet_type, boss_attack, magic_type, stage_play
+from stage import boss_attack, magic_type
+from boss import bullet_type, bullet_levelup
 from start import WIDTH, HEIGHT
 from norm_func import *
 from spec_func import *
@@ -80,7 +81,7 @@ class Player(pygame.sprite.Sprite):
                 self.rect = self.image.get_rect(center = (round(self.pos[0]),round(self.pos[1])))
 
             # 탄에 닿았을때
-            if len(collide) > 0 and not self.godmod:
+            if len(collide) > 0 and not self.godmod and not collide[0].ghost:
                 s_pldead.play()
                 self.godmod = True
                 self.before_health = self.health
@@ -491,10 +492,15 @@ class Boss_Enemy(pygame.sprite.Sprite):
             self.rect = self.image.get_rect(center = self.pos)
                     
         if self.dieleft: # 죽었을때 이벤트
-            remove_allbullet()
+            st.clock_fps = 60
             self.death_count += 1
             self.pos = calculate_new_xy(self.pos,1,self.move_dir)
             if self.death_count == 60:
+                remove_allbullet()
+                if not levelup: 
+                    levelup = True
+                    boss.count = 0
+                    boss2.count = 0
                 screen_shake_count = 30
                 died_channel.play(s_enep1)
                 add_effect(get_new_pos(self.pos,100,0),5)               
@@ -502,14 +508,10 @@ class Boss_Enemy(pygame.sprite.Sprite):
                 add_effect(get_new_pos(self.pos,0,100),5)      
                 add_effect(get_new_pos(self.pos,0,-100),5)                                            
                 self.pos = (-128,-128)                                                        
-                self.real_appear = False                
-            if self.death_count == 130:
-                st.clock_fps = 60
-                if not levelup: levelup = True
+                self.real_appear = False   
                 self.dieleft = False
                 self.appear = False
-                self.death_count = 0                                        
-            
+                self.death_count = 0                
         self.rect.center = get_new_pos(self.pos,0,math.sin(self.sin*math.pi/180)*3)
 
     def reset(self):
@@ -890,6 +892,7 @@ class Skill_Core(): # 스킬 능력 구현
             pygame.draw.circle(screen, (0, 166, 255,180), player.pos, 50)
         if self.num == 26:
             pygame.draw.circle(screen, (255, 100, 215,180), player.pos, self.radius//2)
+# 탄
 class Bullet(pygame.sprite.Sprite):    
     def __init__(self, x, y, direction, speed, bul, col, mod, num=(0,0)):
         # 이미지
@@ -918,12 +921,15 @@ class Bullet(pygame.sprite.Sprite):
         self.keeplotate = True if (bul == 10 or bul == 11 or bul == 14) else False
         self.keeplotate_count = 0
         self.screen_die = False
-        self.fade = False
+        self.fade = False # 탄 숨기기
+        self.ghost = False # 피탄없음
     def update(self, screen):
         mod, sub = math.trunc(self.mod), (self.mod*10)%10
         direc = self.direction
         #모드 값이 있으면 탄 속성 변화###############################################
-        bullet_type(self,mod,sub)           
+        if levelup:bullet_levelup(self,mod,sub) 
+        else:bullet_type(self,mod,sub)      
+        
         ################################################
                     
         if direc != self.direction and self.lotate:# 각도 계산후 위치 업데이트
@@ -1246,6 +1252,8 @@ player.skill_list.append(Skill(17,10,st.other[4],st.other[5],5,120,80))
 
 stages = [[(1,2),(3,1),(2,3),(6,7),(7,8),(8,6),(1,8),(2,6),(3,7)],\
         [(12,13),(13,27) ,(14,28),(12,27),(14,13),(14,12),(12,28),(28,13),(14,27)],\
-        [(15,16),(16,30),(22,23),(23,24),(22,24),(15,22),(24,30) ,(23,16),(30,15),(30,22) ]]
+        [(15,16),(16,30),(22,23),(23,24),(22,24),(15,22),(24,30) ,(23,16),(30,15),(30,22) ],\
+          [(15,16),(16,30),(22,23),(23,24),(22,24),(15,22),(24,30) ,(23,16),(30,15),(30,22) ]  ,\
+              [(11,34),(31,32),(31,11),(32,34),(32,11),(33,34)]]
 
 stage_playing = (1,2)

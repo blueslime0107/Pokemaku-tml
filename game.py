@@ -108,6 +108,7 @@ def play_game():
     while sv.play:
         # 60 프레임
         st.clock.tick(st.clock_fps)
+        st.TARGET_FPS = st.clock_fps
         now = st.time.time()        
         st.dt = (now-st.prev_time)*st.TARGET_FPS        
         st.prev_time = now

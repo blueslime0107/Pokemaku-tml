@@ -180,7 +180,7 @@ class Tittle():
         self.save = 1
         self.name1 = " 1"
         self.name2 = "드넓은 초원"
-        self.defalt = ["앗!","다!"]
+        self.defalt = [st.other[6],st.other[7]]
         self.pos = [st.WIDTH//2+50,st.HEIGHT//2]
         self.pos_stage = [st.WIDTH//2+10,st.HEIGHT//2-20]
         self.count_max = 180
@@ -1240,9 +1240,9 @@ item_group = pygame.sprite.Group()
 
 starting = True
 read_end = False
-player.skill_list.append(Skill(8,2,"얼리진 않는","냉동빔",2,90,80))
-player.skill_list.append(Skill(10,0,"충격 흡수량 최대","코튼가드",3,5,50))
-player.skill_list.append(Skill(17,10,"경계를 뚫는?!","땅굴파기",5,120,80))
+player.skill_list.append(Skill(8,2,st.other[0],st.other[1],2,90,80))
+player.skill_list.append(Skill(10,0,st.other[2],st.other[3],3,5,50))
+player.skill_list.append(Skill(17,10,st.other[4],st.other[5],5,120,80))
 
 stages = [[(1,2),(3,1),(2,3),(6,7),(7,8),(8,6),(1,8),(2,6),(3,7)],\
         [(12,13),(13,27) ,(14,28),(12,27),(14,13),(14,12),(12,28),(28,13),(14,27)],\

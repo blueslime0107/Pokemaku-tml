@@ -284,15 +284,15 @@ def boss_attack(num,count,pos,ready,boss):
                 for i in range(0,HEIGHT+24,24):
                     bullet((WIDTH,i),180,3,19,randint(0,7),28,sv.player.pos[0]*2)
         if num == 30: # 크레세리아
-            if while_time(count,4) and count < 60:
+            if while_time(count,2) and count < 60:
                 bullet_effect(s_tan1,2,pos)
-                for _ in range(0,6):
+                for _ in range(0,7):
                     bullet(pos,randint(45,315),randfloat(3,6),3,2)        
             if when_time(count,60):
                 set_go_boss(3,randint(0,360),50,boss)
-            if while_time(count,4) and big_small(count,120,180):
+            if while_time(count,2) and big_small(count,120,180):
                 bullet_effect(s_tan1,2,pos)
-                for _ in range(0,6):
+                for _ in range(0,7):
                     bullet(pos,randint(45,315),randfloat(3,6),3,2)
             if while_time(count,20) and big_small(count,181,245):
                 bullet_effect(s_tan1,2,pos)
@@ -302,6 +302,10 @@ def boss_attack(num,count,pos,ready,boss):
                 for i in range(0,360,20):
                     bullet(pos,i+count*2.7,5,19,7)
             if when_time(count,260): count = 0
+    
+    
+    
+    
     if ready:pos = go_boss(boss)
     else:pos = calculate_new_xy(pos,boss.move_speed,boss.move_dir)
     return count,pos,ready

@@ -93,9 +93,9 @@ def all_reset():
 
     sv.starting = True
     sv.read_end = False
-    sv.player.skill_list.append(sv.Skill(8,2,"얼리진 않는","냉동빔",2,90,80))
-    sv.player.skill_list.append(sv.Skill(10,0,"충격 흡수량 최대","코튼가드",3,5,50))
-    sv.player.skill_list.append(sv.Skill(17,10,"경계를 뚫는?!","땅굴파기",5,120,80))
+    sv.player.skill_list.append(sv.Skill(8,2,st.other[0],st.other[1],2,90,80))
+    sv.player.skill_list.append(sv.Skill(10,0,st.other[2],st.other[3],3,5,50))
+    sv.player.skill_list.append(sv.Skill(17,10,st.other[4],st.other[5],5,120,80))
 
 
 def play_game():
@@ -177,9 +177,9 @@ def play_game():
                                 sv.stage_repeat_count = 0
                                 sv.stage_condition = 1
                                 sv.player.skill_list = []
-                                sv.player.skill_list.append(sv.Skill(8,2,"얼리진 않는","냉동빔",2,90,80))
-                                sv.player.skill_list.append(sv.Skill(10,0,"충격 흡수량 최대","코튼가드",3,5,50))
-                                sv.player.skill_list.append(sv.Skill(17,10,"경계를 뚫는?!","땅굴파기",5,120,80))
+                                sv.player.skill_list.append(sv.Skill(8,2,st.other[0],st.other[1],2,90,80))
+                                sv.player.skill_list.append(sv.Skill(10,0,st.other[2],st.other[3],3,5,50))
+                                sv.player.skill_list.append(sv.Skill(17,10,st.other[4],st.other[5],5,120,80))
                                 sv.player.power = 400
                                 st.score = 0
                                 sv.skill_activating = []
@@ -409,7 +409,7 @@ def play_game():
                         text1 = score_font.render(str(sv.stage_fun+1) +"-"+str(i+1), True, text_color)
                         render_layer.blit(text1,(240,60+25*(i+1)))                   
                 if sv.menu_mod[0] == 1: # 설명
-                    font = pygame.font.Font(FONT_2, 30)
+                    font = pygame.font.Font(FONT_2, 20)
                     pygame.draw.rect(render_layer, (0,0,0), (20,20,WIDTH-40,HEIGHT-40), width=0)
                     for texta in range(0,len(st.htp_scroll)):
                         text1 = font.render(st.htp_scroll[texta], True, (255,255,255))
@@ -422,10 +422,10 @@ def play_game():
                         render_layer.blit(text1,(30,10*texta+30))
                 if sv.menu_mod[0] == 3: # 설정
                     curser_max = 2
-                    text_box = ["화면모드","음악","효과음"]
-                    text_box[0] = "화면모드    창모드" if st.full_on == 0 else "화면모드    전체화면"
-                    text_box[1] = "음악   " + str(st.music_volume)
-                    text_box[2] = "효과음  " + str(st.sfx_volume)
+                    text_box = ["Mod","Music","Sound"]
+                    text_box[0] = "Mod    Window" if st.full_on == 0 else "Mod    Window"
+                    text_box[1] = "Music   " + str(st.music_volume)
+                    text_box[2] = "Sound  " + str(st.sfx_volume)
                     for i in range(0,3):
                         text_color = (255,0,255) if i == sv.curser else (0,0,255)
                         text1 = score_font.render(text_box[i], True, text_color)

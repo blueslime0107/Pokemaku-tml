@@ -38,6 +38,7 @@ text_text = open("resources\how_to_play.txt", 'r', encoding="UTF-8")
 text_credit = open("resources\credit.txt", 'r', encoding="UTF-8")
 score_text = open("resources\score.txt", 'r', encoding="UTF-8")
 pkm_text = open("resources\pk_name.txt", 'r', encoding="UTF-8")
+other_txt = open("resources\other.txt", 'r', encoding="UTF-8")
 text_scroll = []
 text_start = [0]
 a = 0
@@ -61,7 +62,11 @@ lines = pkm_text.readlines()
 for line in lines:
     line = line.strip()
     pk_name.append(line)
-
+other = []
+lines = other_txt.readlines()
+for line in lines:
+    line = line.strip()
+    other.append(line)
 
 
 full_on = False

@@ -1,7 +1,7 @@
 import stage_var as sv
 import start as st
 from start import render_layer, WIDTH, HEIGHT
-from start import s_tan1,s_kira0,s_tan2,s_kira1, tan2_channel, tan_channel, kira2_channel, kira_channel, pk_name, enep_channel, s_enep2
+from start import s_tan1,s_kira0,s_tan2,s_kira1, tan2_channel, tan_channel, kira2_channel, kira_channel, pk_name, enep_channel, s_enep2, lazer_channel, s_lazer1
 from norm_func import *
 
 def dif(num):
@@ -33,6 +33,7 @@ def bullet_effect(sound,col,pos,only_sound = False):
         elif sound == s_kira1:kira2_channel.play(sound)
         elif sound == s_tan2:tan2_channel.play(sound)
         elif sound == s_enep2:enep_channel.play(sound)
+        elif sound == s_lazer1:lazer_channel.play(sound)
         else:sound.play()
     if not only_sound:add_effect(pos,2,col)
 def sbullet_effect(sound,col,pos,only_sound = False):
@@ -41,6 +42,7 @@ def sbullet_effect(sound,col,pos,only_sound = False):
         elif sound == s_kira0:kira_channel.play(sound)
         elif sound == s_kira1:kira2_channel.play(sound)
         elif sound == s_tan2:tan2_channel.play(sound)
+        elif sound == s_lazer1:lazer_channel.play(sound)
         else:sound.play()
     if not only_sound:add_effect((pos[0]/2,pos[1]/2),2,col)
 def add_effect(pos,num,col=0):
@@ -50,6 +52,11 @@ def magic_bullet(pos,dir,speed,mode=0,screend=0):
 def look_at_player(pos):
     x, y = pos
     dx, dy = sv.player.pos
+    angle = math.degrees(math.atan2(y - dy, dx - x))
+    return angle 
+def slook_at_player(pos):
+    x, y = pos
+    dx, dy = (sv.player.pos[0],sv.player.pos[1])
     angle = math.degrees(math.atan2(y - dy, dx - x))
     return angle 
 def set_bossmove_point(pos,speed,miss,boss):

@@ -7,8 +7,8 @@ import start as st
 import stage_var as sv
 from norm_func import *
 from spec_func import background_scroll
-from start import render_layer, WIDTH, HEIGHT, TITLE, FONT_1, FONT_2, score_font, menu_img, monitor_size, up_render_layer,skill_surface
-from start import s_boom, s_cancel, s_cat1, s_ch0, s_ch2, s_damage0, s_damage1, s_enedead, s_enep1, s_enep2, s_graze, s_item0, s_kira0, s_kira1, s_lazer1, s_ok, s_pause, s_pldead, s_plst0, s_select, s_slash, s_tan1, s_tan2, s_piyo, s_shoot, s_nodam
+from start import render_layer, WIDTH, HEIGHT, TITLE, FONT_1, FONT_2, score_font, menu_img, monitor_size, up_render_layer,skill_surface, debug_font
+from start import s_boom, s_cancel, s_cat1, s_ch0, s_ch2, s_damage0, s_damage1, s_enedead, s_enep1, s_enep2, s_graze, s_item0, s_kira0, s_kira1, s_lazer1, s_kak,s_ok, s_pause, s_pldead, s_plst0, s_select, s_slash, s_tan1, s_tan2, s_piyo, s_shoot, s_nodam
 from stage import stage_manager, game_music_setting
 # 게임에 핵심적인 기능만 주석을 넣었습니다 ##
 
@@ -46,6 +46,7 @@ def music_and_sfx_volume(m,s):
     s_piyo.set_volume(s*2)
     s_shoot.set_volume(s)
     s_nodam.set_volume(s)
+    s_kak.set_volume(s*1.5)
 def all_reset():
     sv.music_playing = False
     sv.play = True
@@ -278,6 +279,10 @@ def play_game():
                         pause_menu.blit(menu,(0,200+32*i))
                     screen.blit(pygame.transform.scale2x(pause_menu),(0,0))     
             else:pass 
+            
+            text_color = (255,255,255)
+            text1 = debug_font.render(str(len(sv.spr.sprites())), True, text_color)
+            screen.blit(text1,(800,700)) 
             
             pygame.display.flip()       
         if sv.cur_screen == 0:

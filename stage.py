@@ -1,6 +1,6 @@
 from numpy import s_
 import start as st
-from start import WIDTH,HEIGHT, bg_image, pokemons, boss_movebox, small_border, BGM1,BGM2,BGM3,BGM4,BGM5
+from start import WIDTH,HEIGHT, bg_image, pokemons, boss_movebox, small_border, BGM1,BGM2,BGM3,BGM4,BGM5,BGM6
 from spec_func import *
 import stage_var as sv
 import pygame, math
@@ -63,8 +63,8 @@ def game_defalt_setting(fun): # 게임 스테이지 배경 정하기
         st.bkgd_list.append(sv.Back_Ground(bg_image,(0,510,540,90),4))
         st.bkgd_list.append(sv.Back_Ground(bg_image,(0,600,540,120),5))
     if fun == 6:
-        st.bkgd_list.append(sv.Back_Ground(bg_image,(0,1800,540,360),5,8,0))
-        st.bkgd_list.append(sv.Back_Ground(bg_image,(540,2070,540,90),3,8,280))
+        st.bkgd_list.append(sv.Back_Ground(bg_image,(0,1800,540,360),5))
+        st.bkgd_list.append(sv.Back_Ground(bg_image,(540,2070,540,90),3))
 
 def game_music_setting(fun):
     if not sv.music_playing:
@@ -80,7 +80,7 @@ def game_music_setting(fun):
         if fun == 5:
             pygame.mixer.music.load(BGM5)
         if fun == 6:
-            pygame.mixer.music.load(BGM4)
+            pygame.mixer.music.load(BGM6)
         pygame.mixer.music.play(-1)
         sv.music_playing = True
     else:
@@ -126,30 +126,17 @@ def boss_attack(num,count,pos,ready,boss):
     if boss.code == 2:
         pos = set_bossmove_point((WIDTH-150,HEIGHT//2-50),60,3,boss)
     if ready:
-        if sv.levelup:count = boss_levelup(num,pos,boss,count)
-        else:count = boss_file(num,pos,boss,count)
-    
+        #if sv.levelup:count = boss_levelup(num,pos,boss,count)
+        #else:count = boss_file(num,pos,boss,count)
+        count = boss_file(num,pos,boss,count)
     if ready:pos = go_boss(boss)
     else:pos = calculate_new_xy(pos,boss.move_speed,boss.move_dir)
     return count,pos,ready
 # 스테이
 
-def magic_type(self,mod):
-    if mod == 27:
-        self.count += 1
-        if while_time(self.count,4):
-            bullet_effect(s_tan1,1,self.pos)
-            bullet(self.pos,0,0,3,1,27)
-        if when_time(self.count,60):
-            self.screen_die = 0
-            self.speed += 4
-            self.direction = look_at_player(self.pos)
-            self.num = sv.player.pos
-        if distance(self.pos,self.num) <= 2:
-            bullet_effect(s_enep2,1,self.pos)
-            rand = randint(0,30)
-            for i in range(0,360,30):                
-                bullet(self.pos,i+rand,3,15,1)
+
+
+
 def stage_manager():    
     if sv.stage_end <= 0:
         if True:

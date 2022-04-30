@@ -37,8 +37,8 @@ pygame.display.flip()
 text_text = open("resources\how_to_play.txt", 'r', encoding="UTF-8")
 text_credit = open("resources\credit.txt", 'r', encoding="UTF-8")
 score_text = open("resources\score.txt", 'r', encoding="UTF-8")
-pkm_text = open("resources\pk_name.txt", 'r', encoding="UTF-8")
-other_txt = open("resources\other.txt", 'r', encoding="UTF-8")
+pkm_text = open("resources\kor_pk_name.txt", 'r', encoding="UTF-8")
+other_txt = open("resources\kor_other.txt", 'r', encoding="UTF-8")
 text_scroll = []
 text_start = [0]
 a = 0
@@ -114,6 +114,7 @@ s_pause = pygame.mixer.Sound('resources\Music\SFX\se_pause.wav')
 s_piyo = pygame.mixer.Sound('resources\Music\SFX\se_piyo.wav')
 s_shoot = pygame.mixer.Sound('resources\Music\SFX\se_focusfix.wav')
 s_nodam = pygame.mixer.Sound('resources\Music\SFX\se_nodamage.wav')
+s_kak = pygame.mixer.Sound('resources\Music\SFX\se_nice.wav')
 FONT_1 = 'resources\Font\SEBANG Gothic Bold.ttf' 
 FONT_2 = 'resources\Font\SEBANG Gothic.ttf'
 FIELD_1 = 'resources\Music\BGM\\1Stage.wav'
@@ -122,6 +123,7 @@ BGM2 = 'resources\Music\BGM\stage2.wav'
 BGM3 = 'resources\Music\BGM\stage3.wav'
 BGM4 = 'resources\Music\BGM\stage4.wav'
 BGM5 = 'resources\Music\BGM\stage5.wav'
+BGM6 = 'resources\Music\BGM\stage6.wav'
 TITLE = 'resources\Music\BGM\Menu.wav'
 
 tan_channel = pygame.mixer.Channel(0)
@@ -136,6 +138,7 @@ graze_channel = pygame.mixer.Channel(8)
 enep_channel = pygame.mixer.Channel(9)
 died_channel = pygame.mixer.Channel(10)
 damage_channel = pygame.mixer.Channel(11)
+lazer_channel = pygame.mixer.Channel(12)
 a_list = []
 cur_list = []
 if True:
@@ -371,11 +374,12 @@ score = 0
 bkgd_list = []
 # 폰트 불러오기
 score_font = pygame.font.Font(FONT_1, 25)
+debug_font = pygame.font.Font(FONT_1, 21)
 font1 = pygame.font.Font(FONT_1, 18)
 #쌀점,경험치,고속주행,그레이즈, 포획, 스펠클리어
 score_setting = (1000,2000,1,200,50000,777777,0,0,0)
 bullet_border_wide = 200
-bullet_border = Rect(0-bullet_border_wide, 0-bullet_border_wide, WIDTH*2 + bullet_border_wide, HEIGHT*2 + bullet_border_wide)
+bullet_border = Rect(0-bullet_border_wide, 0-bullet_border_wide, WIDTH*2 + bullet_border_wide*2, HEIGHT*2 + bullet_border_wide*2)
 small_border = Rect(0, 0, WIDTH*2, HEIGHT*2)
 near_border= Rect(0, 0, WIDTH, HEIGHT)
 far_border= Rect(-50, -50, WIDTH+100, HEIGHT+100)

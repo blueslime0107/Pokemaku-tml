@@ -22,6 +22,11 @@ def calculate_new_xy(old_xy, speed, angle_in_degrees, no_delta = False):
     if not no_delta: move_vec = (move_vec[0]*st.dt,move_vec[1]*st.dt)
     return (old_xy[0] + move_vec[0],old_xy[1] + move_vec[1])
 
+def noreturn_xy(speed, angle_in_degrees):
+    move_vec = pygame.math.Vector2()
+    move_vec.from_polar((speed, angle_in_degrees))
+    return move_vec
+
 def distance(f_pos,sec_pos):
     if str(type(f_pos)) == "<class 'int'>": f_pos = (0,0)
     if str(type(sec_pos)) == "<class 'int'>": sec_pos = (0,0)

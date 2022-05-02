@@ -108,24 +108,25 @@ def set_go_boss(speed,dir,count,boss):
         boss.move_time = count
 def go_boss(boss):
     pos = list(calculate_new_xy(boss.pos, boss.move_speed, boss.move_dir))
-    if not boss.box_disable:
-        if pos[0] < sv.boss_movebox.x:
-            pos[0] = sv.boss_movebox.x
-        if pos[0] > sv.boss_movebox.x+sv.boss_movebox.width:
-            pos[0] = sv.boss_movebox.x+sv.boss_movebox.width
-        if pos[1] < sv.boss_movebox.y:
-            pos[1] = sv.boss_movebox.y
-        if pos[1] > sv.boss_movebox.y+sv.boss_movebox.height:
-            pos[1] = sv.boss_movebox.y+sv.boss_movebox.height
-    else:
-        if pos[0] < 32:
-            pos[0] = 32
-        if pos[0] > WIDTH-32:
-            pos[0] = WIDTH-32
-        if pos[1] < 32:
-            pos[1] = 32
-        if pos[1] > HEIGHT-32:
-            pos[1] = HEIGHT-32           
+    if not boss.really_box_disable:
+        if not boss.box_disable:
+            if pos[0] < sv.boss_movebox.x:
+                pos[0] = sv.boss_movebox.x
+            if pos[0] > sv.boss_movebox.x+sv.boss_movebox.width:
+                pos[0] = sv.boss_movebox.x+sv.boss_movebox.width
+            if pos[1] < sv.boss_movebox.y:
+                pos[1] = sv.boss_movebox.y
+            if pos[1] > sv.boss_movebox.y+sv.boss_movebox.height:
+                pos[1] = sv.boss_movebox.y+sv.boss_movebox.height
+        else:
+            if pos[0] < 32:
+                pos[0] = 32
+            if pos[0] > WIDTH-32:
+                pos[0] = WIDTH-32
+            if pos[1] < 32:
+                pos[1] = 32
+            if pos[1] > HEIGHT-32:
+                pos[1] = HEIGHT-32           
     boss.move_time -= 1
     if boss.move_time == 0:
         boss.move_speed = 0

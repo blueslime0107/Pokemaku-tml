@@ -47,34 +47,32 @@ def music_and_sfx_volume(m,s):
     s_shoot.set_volume(s)
     s_nodam.set_volume(s)
     s_kak.set_volume(s*1.5)
-def all_reset():
-    sv.music_playing = False
-    sv.play = True
-    sv.cur_full_mod = False
+def all_reset(reset):
+    if not reset:
+        sv.music_playing = False #
+        sv.play = True #
+        sv.cur_full_mod = False #    
+        sv.frame_count = 0 #
+        sv.cur_count = 0 #
+        sv.time_stop = False #
+        sv.stage_count = 0 #
+        sv.screen_shake_count = 0 #        
+        sv.game_clear = False #   
+        sv.curser = sv.stage_challenge #
+        sv.character = 0 #
+        sv.cur_screen = 0 #        
+        sv.stage_end = 0 #        
+        sv.practicing = False #
+       
+    # 게임 시작전 메뉴 변수들
     sv.pause = False
-    sv.frame_count = 0
-    sv.cur_count = 0
-    sv.time_stop = False
-    sv.stage_count = 0
-    sv.screen_shake_count = 0
-    sv.add_dam = 0
-    sv.drilling = False
-    sv.game_clear = False   
-    sv.curser = sv.stage_challenge
-    #sv.select_mod = 0
-    #sv.menu_mod = []
-    sv.character = 0
-    sv.cur_screen = 0
+    sv.all_trig = False #
     sv.stage_line = 0
     sv.stage_cline = 0
     sv.stage_repeat_count = 0
     sv.stage_condition = 1
-    #sv.stage_challenge = 0
-    sv.stage_end = 0
     sv.skill_activating = []
-    sv.practicing = False
-    sv.levelup = False   
-    # 게임 시작전 메뉴 변수들
+    sv.levelup = False
     sv.boss = sv.Boss_Enemy(1)
     sv.boss2 = sv.Boss_Enemy(2)
     sv.boss_group = pygame.sprite.Group(sv.boss2,sv.boss)
@@ -91,13 +89,18 @@ def all_reset():
     sv.beams_group = pygame.sprite.Group()
     sv.effect_group = pygame.sprite.Group()
     sv.item_group = pygame.sprite.Group()
-
     sv.starting = True
     sv.read_end = False
-    sv.player.skill_list.append(sv.Skill(8,2,st.other[0],st.other[1],2,90,80))
-    sv.player.skill_list.append(sv.Skill(10,0,st.other[2],st.other[3],3,5,50))
-    sv.player.skill_list.append(sv.Skill(17,10,st.other[4],st.other[5],5,120,80))
-
+    if reset:
+        sv.pause_lock = False
+        sv.player.skill_list = []
+        sv.player.power = 400
+        st.score = 0    
+        sv.stage_fun -= 1
+        sv.stage_playing = sv.stages[sv.stage_fun][sv.stage_challenge] 
+    sv.player.skill_list.append(sv.Skill(1,3,st.other[0],st.other[1],2,90,80))
+    sv.player.skill_list.append(sv.Skill(2,2,st.other[2],st.other[3],3,90,50))
+    sv.player.skill_list.append(sv.Skill(3,10,st.other[4],st.other[5],5,120,80))
 
 def play_game():
     global screen
@@ -158,37 +161,8 @@ def play_game():
                                 else:
                                     sv.pause = False
                             if sv.curser == 1:
-                                sv.pause_lock = False
-                                sv.boss = sv.Boss_Enemy(1)
-                                sv.boss2 = sv.Boss_Enemy(2)
-                                sv.boss_group = pygame.sprite.Group(sv.boss2,sv.boss)
-                                sv.spr = pygame.sprite.Group()
-                                sv.magic_spr = pygame.sprite.Group()
-                                sv.player = sv.Player(-125,-125,5,500)
-                                sv.player_group = pygame.sprite.Group(sv.player)
-                                sv.player_hitbox = sv.Player_hit()
-                                sv.skillobj_group = pygame.sprite.Group()
-                                sv.title = sv.Tittle(1)
-                                sv.ui = sv.UI(1)
-                                sv.under_ui = sv.Under_PI()
-                                sv.beams_group = pygame.sprite.Group()
-                                sv.effect_group = pygame.sprite.Group()
-                                sv.item_group = pygame.sprite.Group()
-                                sv.stage_line = 0
-                                sv.stage_cline = 0
-                                sv.stage_repeat_count = 0
-                                sv.stage_condition = 1
-                                sv.player.skill_list = []
-                                sv.player.skill_list.append(sv.Skill(8,2,st.other[0],st.other[1],2,90,80))
-                                sv.player.skill_list.append(sv.Skill(10,0,st.other[2],st.other[3],3,5,50))
-                                sv.player.skill_list.append(sv.Skill(17,10,st.other[4],st.other[5],5,120,80))
-                                sv.player.power = 400
-                                st.score = 0
-                                sv.skill_activating = []
-                                sv.pause = False    
-                                sv.levelup = False  
-                                sv.stage_fun -= 1
-                                sv.stage_playing = sv.stages[sv.stage_fun][sv.stage_challenge]             
+                                all_reset(True)
+                                            
                             if sv.curser == 2: 
                                 sv.stage_fun -= 1
                                 sv.pause_lock = False
@@ -202,31 +176,43 @@ def play_game():
                 break
             
             # 탄에 박았는가
-            hit_list = pygame.sprite.spritecollide(sv.player_hitbox, sv.spr, not sv.player.godmod, pygame.sprite.collide_circle)                  
-            boss_collide = pygame.sprite.spritecollide(sv.boss, sv.beams_group, False, pygame.sprite.collide_circle)
+            hit_list = pygame.sprite.spritecollide(sv.player_hitbox, sv.spr, not sv.player.godmod, pygame.sprite.collide_circle)
+            sv.boss.rect.center = get_new_pos(sv.boss.rect.center,-50)     
+            sv.boss2.rect.center = get_new_pos(sv.boss2.rect.center,-50)             
+            boss_collide = pygame.sprite.spritecollide(sv.boss, sv.beams_group, False, pygame.sprite.collide_circle)            
             boss2_collide = pygame.sprite.spritecollide(sv.boss2, sv.beams_group, False, pygame.sprite.collide_circle)
+            sv.boss.rect.center = get_new_pos(sv.boss.rect.center,50)  
+            sv.boss2.rect.center = get_new_pos(sv.boss2.rect.center,50)  
+            
             # 연산 업데이트
-            if not sv.pause:      
-                if sv.magic_spr.sprites():sv.magic_spr.update(screen)    
-                if sv.skill_activating:
-                    for skill in sv.skill_activating[:]:
-                        skill.update(sv.boss)
-                        if skill.cool <= 0 and skill.draw_cool <= 0: sv.skill_activating.remove(skill)
-                if sv.skillobj_group: sv.skillobj_group.update(screen)
-                sv.spr.update(screen)                
-                if sv.beams_group: sv.beams_group.update()                            
-                sv.player_group.update(hit_list,keys)
-                sv.player_hitbox.update()
-                if sv.enemy_group:sv.enemy_group.update()
-                if sv.item_group: sv.item_group.update()
-                sv.boss.update(boss_collide)
-                sv.boss2.update(boss2_collide)
-                if sv.effect_group: sv.effect_group.update()
-                stage_manager()
-                sv.frame_count += 1
-                sv.stage_count += 1
-                if not st.bkgd_list == []:
-                    for i in st.bkgd_list:i.update()
+            
+            if not sv.pause:  
+                if not sv.time_stop:    
+                    if sv.magic_spr.sprites():sv.magic_spr.update(screen)    
+                    if sv.skill_activating:
+                        for skill in sv.skill_activating[:]:
+                            skill.update(sv.boss)
+                            if skill.cool <= 0 and skill.draw_cool <= 0: sv.skill_activating.remove(skill)
+                    if sv.skillobj_group: sv.skillobj_group.update(screen)
+                    sv.spr.update(screen)                
+                    if sv.beams_group: sv.beams_group.update()                            
+                    sv.player_group.update(hit_list,keys)
+                    sv.player_hitbox.update()
+                    if sv.enemy_group:sv.enemy_group.update()
+                    if sv.item_group: sv.item_group.update()
+                    sv.boss.update(boss_collide)
+                    sv.boss2.update(boss2_collide)
+                if sv.time_stop:
+                    if sv.boss.dont_stop: sv.boss.update(boss_collide)
+                    if sv.boss2.dont_stop: sv.boss2.update(boss2_collide)
+                if not sv.time_stop: 
+                    if sv.effect_group: sv.effect_group.update()
+                    stage_manager()
+                    sv.frame_count += 1
+                    sv.stage_count += 1
+                    if not st.bkgd_list == []:
+                        for i in st.bkgd_list:i.update()
+
             # 그리기 시작
             if sv.frame_count >= 60:
                 if not sv.pause:
@@ -241,7 +227,7 @@ def play_game():
                     sv.item_group.draw(render_layer)
                     sv.magic_spr.draw(render_layer)      
                     sv.beams_group.draw(render_layer)  
-                    if (not sv.player.died) and not sv.drilling:sv.player_group.draw(render_layer) 
+                    if (not sv.player.died):sv.player_group.draw(render_layer) 
                     sv.enemy_group.draw(render_layer)            
                     if not sv.starting or sv.read_end: sv.enemy_group.draw(render_layer)
                     sv.boss_group.draw(render_layer)
@@ -457,7 +443,7 @@ def play_game():
             sv.cur_full_mod = st.full_on
     if st.game_restart:
         st.game_restart = False
-        all_reset()
+        all_reset(False)
         play_game()
 
 if __name__ == "__main__":

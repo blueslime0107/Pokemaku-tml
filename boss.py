@@ -98,7 +98,6 @@ def boss_file(num,pos,boss,count):
             s_lazer1.play()
             magic_bullet(pos,boss.list[0],32,10)
         if when_time(count,300): count = 0
-
     if num == 11: # 세레비
         if when_time(count,30):
             bullet_effect(s_kira0,5,pos)
@@ -161,6 +160,21 @@ def boss_file(num,pos,boss,count):
             bullet(pos,90,5,19,2,16)
         if while_time(count,180):
             set_go_boss(3,-look_at_point(pos,(pos[0],sv.player.pos[1])),40,boss)
+    if num == 17: # 가이오가
+        if while_time(count+300,360):
+            boss.list[0] = look_at_player(pos)
+            bullet_effect(s_tan1,3,pos)
+            for i in range(0,360,36):
+                bullet(pos,i,randfloat(4,6),3,3,17,boss)
+    if num == 18: # 그란돈
+        if while_time(count+340,400):
+            sv.screen_shake_count = 30
+            # bullet_effect(s_enep1,7,pos)
+            # for i in range(0,360,45):
+            #     bullet_effect(s_tan1,1,calculate_new_xy(pos,50,i,True))
+            #     for j in range(0,360,10):
+            #         bullet(calculate_new_xy(pos,50,i,True),j,4,3,7)
+            magic_bullet((WIDTH,HEIGHT),180,14,18)    
     if num == 20: # 지라치
         if while_time(count,2) and boss.list[0] < 540 and big_small(count,1,61):
             bullet_effect(s_tan1,2,(540-boss.list[0],0))
@@ -189,11 +203,8 @@ def boss_file(num,pos,boss,count):
             add_effect(pos,5)
             s_kak.play()
         if when_time(count,240):
-            count = 0
-
-    
-    
-    if num == 22:
+            count = 0    
+    if num == 22: # 유크시
         if while_time(count,30):
             bullet_effect(s_tan1,6,pos)
             for i in range(0,360,20):
@@ -205,7 +216,7 @@ def boss_file(num,pos,boss,count):
                 if big_small(distance(bule.pos,double(sv.player.pos)),300,600):
                     bullet_effect(s_tan2,bule.shape[1],double(bule.pos,True))
                     bule.hide()
-    if num == 23:
+    if num == 23: # 엠라이트
         if while_time(count,5) and count < 80:
             bullet_effect(s_tan1,0,pos)
             for i in range(0,360,90):
@@ -216,7 +227,7 @@ def boss_file(num,pos,boss,count):
             count = 0
             s_lazer1.play()
             boss.pos = (randint(0,WIDTH),randint(0,HEIGHT))
-    if num == 24:
+    if num == 24: # 아그놈
         if while_time(count+160,180):
             add_effect(pos,8)
         if while_time(count+120,180):
@@ -226,6 +237,55 @@ def boss_file(num,pos,boss,count):
             for i in range(0,360,5):
                 if not big_small(i,rand,rerand):
                     bullet(calculate_new_xy(sv.player.pos,400,i,True),look_at_player(calculate_new_xy(sv.player.pos,400,i,True))+180,3,2,3,24,double(sv.player.pos))
+    if num == 25: # 디아루가
+        boss.dont_stop = True
+        if when_time(count,1):
+            bullet_effect(s_enep2,3,pos)
+            for i in range(0,360,10):
+                bullet(pos,look_at_player(pos)+i,7,19,3)
+        if while_time(count,2) and big_small(count,60,120):
+            sv.time_stop = True
+            for j in range(0,360,20):
+                apos = calculate_new_xy(sv.player.pos,(count-60)*4+80,-j+randint(0,20),True)
+                bullet_effect(s_tan1,0,apos,True)
+                bullet(apos,j+180+randint(60,300),3,5,3)
+            for j in range(0,360,20):
+                bpos = calculate_new_xy(pos,(count-60)*4+80,-j+randint(0,20),True)
+                bullet_effect(s_tan1,0,bpos,True)
+                bullet(bpos,j+180+randint(60,300),3,5,0)
+        if when_time(count,180):
+            s_kira0.play()
+            sv.time_stop = False
+        if when_time(count,420):
+            count = 0
+    if num == 26: # 펄기아
+        boss.really_box_disable = True
+        if when_time(count,10):
+            set_go_boss(10,0,60,boss)
+        if when_time(count,50):
+           posa = (randint(0,WIDTH),0)     
+           bullet_effect(s_slash,2,posa)
+           bullet(posa,look_at_player(posa),14,1,2,26)
+        if when_time(count,110):
+           posa = (WIDTH,randint(0,HEIGHT))     
+           bullet_effect(s_slash,2,posa)
+           bullet(posa,look_at_player(posa),14,1,2,26)
+        if when_time(count,170):
+           posa = (randint(0,WIDTH),HEIGHT)     
+           bullet_effect(s_slash,2,posa)
+           bullet(posa,look_at_player(posa),14,1,2,26)
+        if when_time(count,230):
+           posa = (0,randint(0,HEIGHT))     
+           bullet_effect(s_slash,2,posa)
+           bullet(posa,look_at_player(posa),14,1,2,26)
+           boss.pos[1] = HEIGHT//2
+           set_go_boss(10,180,60,boss)
+        if when_time(count,350):
+            s_kira0.play()
+            sv.all_trig = True
+        if when_time(count,470):
+            count = 0
+            sv.all_trig = False
     if num == 27: # 히드런
         if while_time(count+180,240):
             magic_bullet(pos,45,8,27,1)
@@ -423,6 +483,32 @@ def bullet_type(self,mod,sub):
                 for i in range(4,20):
                     sbullet((sv.player.pos[0]*2+randint(-20,20),0),-90,i,18,1)
             if self.count >= 60: self.kill()
+    if mod == 17:
+        self.count += 1
+        if self.speed > 1: self.speed -= 0.1
+        if self.count == 70:
+            self.speed = 0
+            self.num = look_at_player(self.num.pos)
+        if big_small(self.count,70,130):
+            sbullet_effect(s_tan1,4,self.pos)
+            sbullet(self.pos,self.num,20,1,4)
+        if self.count == 130: 
+            self.speed = 10
+            self.direction = look_at_player(double(self.pos,True))
+        if big_small(self.count,200,260) and while_time(self.count,5):
+            sbullet_effect(s_tan1,3,self.pos)
+            for i in range(0,360,90):
+                sbullet(self.pos,self.count*2.3 + i,5,1,3)
+        if self.count == 260: self.kill()
+    if mod == 18:
+        self.count += 1
+        if self.count == 60:            
+            self.num = self.speed
+            self.speed = 0
+        if self.count == 240: 
+            self.speed = -self.num
+
+
     if mod == 21:
         self.size_change(2)
         self.count += 1
@@ -440,7 +526,23 @@ def bullet_type(self,mod,sub):
                 sbullet_effect(s_enep2,3,self.pos)
                 sbullet(self.pos,look_at_player(double(sv.player.pos)),1,19,2)
             self.kill()
-
+    if mod == 26:
+        if sub == 0:
+            if self.count == 0:
+                self.size_change(80)
+            self.count += 1
+            if while_time(self.count,2):
+                sbullet_effect(s_tan1,6,self.pos)
+                sbullet(self.pos,self.direction,0,9,6,26.1)
+                sbullet(self.pos,self.direction,0,9,6,26.2)
+        if sub == 1 and sv.all_trig:
+            if not self.speed == 4:
+                self.direction += 90
+                self.speed = 4
+        if sub == 2 and sv.all_trig:
+            if not self.speed == 4:
+                self.direction -= 90
+                self.speed = 4
     if mod == 27:
         self.count += 1
         if self.count > 240:
@@ -516,6 +618,26 @@ def magic_type(self,mod):
         if while_time(self.count,10):
             for i in range(0,10):
                 bullet(get_new_pos(self.pos,randint(-100,100),randint(-100,100)),self.direction+randint(-30,30),0,4,5,11,3)
+    if mod == 18:
+        self.count += 1
+        if while_time(self.count,5):
+            bullet_effect(s_tan1,7,self.pos)
+            for i in range(0,6):
+                bullet(get_new_pos(self.pos,i*2),90,6-i,2,7,18)
+                bullet(get_new_pos(self.pos,-i*2),90,6-i,2,7,18)
+            # bullet(self.pos,80,4,11,1)
+            # bullet(self.pos,90,4,11,1)
+            # bullet(self.pos,100,4,11,1)
+        if big_small(self.pos[0],sv.player.pos[0]-20,sv.player.pos[0]+20) and self.num == 0:
+            bullet_effect(s_enep2,1,self.pos)
+            for i in range(0,24,2):
+                bullet(get_new_pos(self.pos,i*2),90,24-i,15,1,18)
+                bullet(get_new_pos(self.pos,-i*2),90,24-i,15,1,18)
+                bullet(get_new_pos(self.pos,i*2),90,(24-i)//2,3,1,18)
+                bullet(get_new_pos(self.pos,-i*2),90,(24-i)//2,3,1,18)
+            self.num = 1
+
+
     if mod == 27:
         self.count += 1
         if while_time(self.count,4):

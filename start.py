@@ -124,6 +124,7 @@ BGM3 = 'resources\Music\BGM\stage3.wav'
 BGM4 = 'resources\Music\BGM\stage4.wav'
 BGM5 = 'resources\Music\BGM\stage5.wav'
 BGM6 = 'resources\Music\BGM\stage6.wav'
+BGM7 = 'resources\Music\BGM\stage7.wav'
 TITLE = 'resources\Music\BGM\Menu.wav'
 
 tan_channel = pygame.mixer.Channel(0)

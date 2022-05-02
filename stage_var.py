@@ -42,7 +42,7 @@ class Player(pygame.sprite.Sprite):
         self.gihapetii = True
         self.shoot_gatcha = 0
     def update(self,collide,keys):
-        global pause, screen_shake_count, drilling
+        global pause, screen_shake_count
         if self.health > self.max_health: self.health = self.max_health
         if not self.died:
             dx, dy = 0 , 0
@@ -100,7 +100,6 @@ class Player(pygame.sprite.Sprite):
                 self.godmod_count -= 1
                 if 0 >= self.godmod_count:
                     self.godmod = False
-                    if drilling: drilling = False
             
             self.gatcha += 0.1
             if self.gatcha >= self.gatcha_max and self.gatcha < self.gatcha_max+60: 
@@ -144,36 +143,6 @@ class Player_hit(pygame.sprite.Sprite):
     def update(self):
         self.pos = (player.pos[0]*2,player.pos[1]*2)
         self.rect.center = self.pos    
-class Skill():
-    def __init__(self,num,col,sub_msg,msg,pp,cool,refill=0):
-        font2 = pygame.font.Font(st.FONT_2, 9)
-        self.image = pygame.Surface((200,37), SRCALPHA)
-        self.image.blit(st.skill_img,(0,0),(0,37*col,200,37))
-        self.image = pygame.transform.flip(self.image, True, True)
-        self.num = num
-        self.cool = cool
-        text = st.font1.render(msg, True, (255,255,255))
-        self.image.blit(text,(1,1))
-        text = font2.render(sub_msg, True, (255,255,255))
-        self.image.blit(text,(1,24))
-        self.max_pp = pp
-        self.pp = self.max_pp  
-        self.refill = 0
-        self.max_refill = refill 
-    def draw(self):
-        sub_image = self.image.copy()    
-
-        text = font1.render(str(self.pp)+"/"+str(self.max_pp), True, (255,255,255))  
-        sub_image.blit(text,(123,1))
-        if self.refill >= self.max_refill:
-            if self.pp < self.max_pp:self.pp+=1
-            self.refill -=self.max_refill
-        a=0
-        try:a = 188/self.max_refill*self.refill
-        except:a=0
-        pygame.draw.rect(sub_image, (0, 221, 255), (0,22,a,2))
-        sub_image.fill((255, 255, 255, 100 if Rect(0,HEIGHT-74,250,74).collidepoint(player.pos) else 255), special_flags=pygame.BLEND_RGBA_MULT)
-        up_render_layer.blit(sub_image,(0,HEIGHT-37))
 class Tittle():
     def __init__(self,value):
         self.stage = value
@@ -245,7 +214,6 @@ class Tittle():
             render_layer.blit(oh,get_new_pos(pos,self.more))
 class Beam(pygame.sprite.Sprite):
     def __init__(self, pos, num=0, dir=0):
-        global add_dam
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.Surface((20,16), pygame.SRCALPHA)                   
         self.rect = self.image.get_rect(center = get_new_pos(pos))            
@@ -276,14 +244,14 @@ class Beam(pygame.sprite.Sprite):
             self.damage = 200
             player.gatcha = 0
         if self.num == 5:
-            self.image = pygame.Surface((40, 24), pygame.SRCALPHA)
-            self.image.fill((122, 207, 255))
+            self.image = pygame.Surface((25, 16), pygame.SRCALPHA)
+            self.image.fill((97, 231, 255,200))
             self.speed = 50
             self.damage = 10
             self.rect = self.image.get_rect(center = get_new_pos(self.pos))  
         #self.image.fill((255, 255, 255, 150), special_flags=pygame.BLEND_RGBA_MULT)
-        self.damage += add_dam
         self.image = pygame.transform.rotate(self.image, self.direction)
+        self.a = 0
     def update(self):
         # 화면 나가면 삭제
         if not near_border.colliderect(self.rect):
@@ -297,11 +265,13 @@ class Beam(pygame.sprite.Sprite):
             self.speed += 1
         if not far_border.colliderect(self.rect):
             self.kill()
-        if self.died and not self.num == 7:
+        if self.died:
             if self.effect:
-                self.kill()
-            else:
-                self.image.fill((255,255,255))
+                self.image.fill((255,255,255,100))
+                self.speed=0
+                self.a += 1
+                if self.a > 40: self.kill()
+            else:                
                 self.effect = True
         self.pos = calculate_new_xy(self.pos, self.speed, -self.direction)
         self.rect = self.image.get_rect(center = get_new_pos(self.pos))  
@@ -422,7 +392,9 @@ class Boss_Enemy(pygame.sprite.Sprite):
         self.appear = False
         self.attack_start = False
         self.box_disable = False
+        self.really_box_disable = False
         self.sin = 0
+        self.dont_stop = False
     def update(self, collide):
         global pause, screen_shake_count, levelup
         if self.health > self.max_health: self.health = self.max_health
@@ -569,11 +541,42 @@ class Spell():
             up_render_layer.blit(self.image,(WIDTH-200,(self.count-60)**2))
         if self.count > 85: up_render_layer.blit(self.image,(WIDTH-200,320))
         self.count += 1
+
+class Skill():
+    def __init__(self,num,col,sub_msg,msg,pp,cool,refill=0):
+        font2 = pygame.font.Font(st.FONT_2, 9)
+        self.image = pygame.Surface((200,37), SRCALPHA)
+        self.image.blit(st.skill_img,(0,0),(0,37*col,200,37))
+        self.image = pygame.transform.flip(self.image, True, True)
+        self.num = num
+        self.cool = cool
+        text = st.font1.render(msg, True, (255,255,255))
+        self.image.blit(text,(1,1))
+        text = font2.render(sub_msg, True, (255,255,255))
+        self.image.blit(text,(1,24))
+        self.max_pp = pp
+        self.pp = self.max_pp  
+        self.refill = 0
+        self.max_refill = refill 
+    def draw(self):
+        sub_image = self.image.copy()    
+
+        text = font1.render(str(self.pp)+"/"+str(self.max_pp), True, (255,255,255))  
+        sub_image.blit(text,(123,1))
+        if self.refill >= self.max_refill:
+            if self.pp < self.max_pp:self.pp+=1
+            self.refill -=self.max_refill
+        a=0
+        try:a = 188/self.max_refill*self.refill
+        except:a=0
+        pygame.draw.rect(sub_image, (0, 221, 255), (0,22,a,2))
+        sub_image.fill((255, 255, 255, 100 if Rect(0,HEIGHT-74,250,74).collidepoint(player.pos) else 255), special_flags=pygame.BLEND_RGBA_MULT)
+        up_render_layer.blit(sub_image,(0,HEIGHT-37))
 class Spell_Obj(pygame.sprite.Sprite):
     def __init__(self, pos, direction, speed,  mod):
         pygame.sprite.Sprite.__init__(self)   
         self.image = pygame.Surface((80,80),SRCALPHA)
-        if mod == 4:
+        if mod == 1:
             pygame.draw.circle(self.image, (255,255,255,150), (40,40), 40)
             pygame.draw.circle(self.image, (255,255,255,100), (40,40), 30)
         if mod == 5:
@@ -593,14 +596,11 @@ class Spell_Obj(pygame.sprite.Sprite):
         self.count = 0
     def update(self,screen):
 
-        if self.num == 4:
-            for enemy in enemy_group.sprites():
-                if distance(self.pos,enemy.pos) <= 40:
-                    self.speed /= 1.05
-                    enemy.move_speed /= 1.05
-                if distance(self.pos,boss.pos) <= 40:
-                    self.speed /= 1.05
-                    boss.move_speed /= 1.05
+        if self.num == 1:
+            self.pos = player.pos
+            for bul in spr.sprites():
+                if distance(self.pos,bul.pos) <= 40:
+                    bul.kill()
             if self.count >= 800:
                 self.kill()
         if self.num ==5:
@@ -667,24 +667,17 @@ class Skill_Core(): # 스킬 능력 구현
         self.radius = 0
     def update(self,bos):
         if self.cool > 0:
-            if self.num == 0: # 몸부림
-                player.pos = get_new_pos(player.pos,randint(-20,20),randint(-20,20))
-            if self.num == 1: # 몸통박치기
+            if self.num == 1: # 주변 탄 삭제
                 self.pos = player.pos
-                for enemy in enemy_group.sprites():
-                    if player.rect.collidepoint(enemy.pos):
-                        enemy.health -= 10
-                if player.rect.collidepoint(boss.pos): 
-                    boss.health -= 10
-                self.cool = 0
+                for bul in spr.sprites():
+                    if distance(double(self.pos),bul.pos) <= 128 and not bul.shape[0] == 19:
+                        add_effect(double(bul.pos,True),7,bul.shape[1])
+                        item_group.add(Item(bul.pos,1))
+                        bul.kill()
+                
+
             if self.num == 2: # 쪼기
-                self.pos = get_new_pos(player.pos,140)
-                for enemy in enemy_group.sprites():
-                    if distance(self.pos,enemy.pos) <= 50:
-                        enemy.health -= 10  
-                if distance(self.pos,boss.pos) <= 50: 
-                    boss.health -= 10
-                self.cool = 0
+                beams_group.add(Beam(player.pos,5))
             if self.num == 3: # 바람일으키기
                 if self.cool == self.max_cool:self.pos = player.pos
                 for enemy in enemy_group.sprites():
@@ -692,206 +685,18 @@ class Skill_Core(): # 스킬 능력 구현
                         enemy.pos = calculate_new_xy(enemy.pos,2,-look_at_player(enemy.pos)+180)
                 if distance(self.pos,boss.pos) <= 200 and boss.move_ready:
                     boss.pos = calculate_new_xy(boss.pos,2,-look_at_player(boss.pos)+180)
-            if self.num == 4: # 실뿜기
-                if self.cool == self.max_cool:
-                    skillobj_group.add(Spell_Obj(player.pos,0,10,4))
-                    skillobj_group.add(Spell_Obj(player.pos,-30,10,4))
-                    skillobj_group.add(Spell_Obj(player.pos,30,10,4))
-            if self.num == 5: # 물놀이
-                if while_time(self.cool,10):
-                    self.pos = get_new_pos(player.pos,randint(-30,30),randint(-30,30))
-                    skillobj_group.add(Spell_Obj(self.pos,0,0,5))
-            if self.num == 6: # 쉘블레이드
-                self.pos = player.pos
-                hit_rect = Rect(0,player.pos[1]-20,WIDTH,40)
-                for enemy in enemy_group.sprites():
-                    if hit_rect.colliderect(enemy.rect):
-                        enemy.health -= 50
-                if hit_rect.colliderect(boss.rect):
-                    boss.health -= 50
-                self.cool = 0
-            if self.num == 7: # 거품발사
-                if while_time(self.cool,5):
-                    self.pos = player.pos
-                    skillobj_group.add(Spell_Obj(self.pos,randint(-30,30),10,6))
-            if self.num == 8:
-                if while_time(self.cool,2):
-                    beams_group.add(Beam(get_new_pos(player.pos,5),5))
-            if self.num == 9: # 씨앗심기
-                if self.cool == self.max_cool:self.pos = get_new_pos(player.pos,200)
-                if while_time(self.cool,4):
-                    for enemy in enemy_group.sprites():
-                        if distance(self.pos,enemy.pos) <= 40:
-                            enemy.health -= 2 
-                            if player.health < player.max_health:player.health += 2
-                    if distance(self.pos,boss.pos) <= 40: 
-                        boss.health -= 2
-                        if player.health < player.max_health:player.health += 2
-            if self.num == 10: # 코튼가드
-                skillobj_group.add(Spell_Obj(player.pos,0,0,10))
-                self.cool = 0
-            if self.num == 11: # 마비가루
-                self.pos = player.pos
-                for bulls in spr.sprites():
-                    if distance((self.pos[0]*2,self.pos[1]*2),bulls.pos) <= 160:
-                        bulls.speed = 1
-                self.cool = 0
-            if self.num == 12: # 독침
-                skillobj_group.add(Spell_Obj(player.pos,0,18,12))
-                self.cool = 0
-            if self.num == 13:
-                if player.godmod: 
-                    self.cool = 0
-                    self.draw_cool = 0
-                if self.cool == 1:
-                    player.health += 100
-                    if player.health > player.max_health: player.health = player.max_health
-            if self.num == 14:
-                if self.cool == self.max_cool:add_dam = 2
-                if self.cool == 1:add_dam = 0
-            if self.num == 15:
-                if self.cool == self.max_cool:self.pos = player.pos
-                if while_time(self.cool,4):
-                    beams_group.add(Beam(self.pos,0))
-            if self.num == 16: # 방전
-                if while_time(self.cool,4):
-                    for i in range(0,360,15):
-                        beams_group.add(Beam(player.pos,6,self.cool*1.4+i))
-            if self.num ==17:
-                if self.cool == self.max_cool:
-                    sv.drilling = True
-                    player.godmod = True
-                    player.godmod_count = 60
-                    player.max_godmod_count = player.godmod_count
-                if self.cool == self.max_cool//2:drilling = False
-            if self.num == 18:
-                if player.godmod:
-                    bullet_clear()
-                    self.cool = 0
-                    self.draw_cool = 0
-            if self.num == 19:
-                self.pos = player.pos
-                for enemy in enemy_group.sprites():
-                    enemy.pos = (enemy.pos[0]+200 if enemy.pos[0]+200 < WIDTH else WIDTH,enemy.pos[1])
-                    enemy.health -= 10 
-                if boss.move_ready:
-                    boss.pos = (boss.pos[0]+200 if boss.pos[0]+200 < 504 else 504,boss.pos[1])
-                self.cool = 0
-            if self.num == 20:
-                if while_time(self.cool,2):
-                    beams_group.add(Beam(get_new_pos(player.pos,5),7,randint(-30,30)))      
-                    beams_group.add(Beam(get_new_pos(player.pos,5),7,randint(-30,30)))    
-            if self.num == 21:
-                if while_time(self.cool,2):
-                    for enemy in enemy_group.sprites():
-                        if boss_movebox.collidepoint(enemy.pos):
-                            enemy.health -= 1
-                if boss_movebox.collidepoint(boss.pos): 
-                    boss.health -= 1   
-            if self.num == 22: # 쪼기
-                self.pos = get_new_pos(player.pos,-180)
-                for enemy in enemy_group.sprites():
-                    if distance(self.pos,enemy.pos) <= 50:
-                        enemy.health -= 5  
-                if distance(self.pos,boss.pos) <= 50: 
-                    boss.health -= 5
-                self.cool = 0
-            if self.num == 23: # 몸통박치기
-                self.pos = player.pos
-                for enemy in enemy_group.sprites():
-                    if player.rect.collidepoint(enemy.pos):
-                        enemy.health -= 500
-                if player.rect.collidepoint(boss.pos): 
-                    boss.health -= 500
-                self.cool = 0
-            if self.num == 24:
-                count = self.max_cool - self.cool
-                if count == 60:screen_shake_count = 600
-                if count >= 60:
-                    for enemy in enemy_group.sprites():
-                        if Rect(player.pos[0]-100,player.pos[1]-100,WIDTH*2,200).collidepoint(enemy.pos):
-                            enemy.health -= 4
-                    if Rect(player.pos[0]-100,player.pos[1]-100,WIDTH*2,200).collidepoint(boss.pos):
-                        boss.health -= 4
-                    for enemy in spr.sprites():
-                        if Rect(player.pos[0]-100,player.pos[1]-100,WIDTH*2,200).collidepoint((enemy.pos[0]//2,enemy.pos[1]//2)):
-                            item_group.add(Item((enemy.pos[0]//2,enemy.pos[1]//2),1))
-                            enemy.kill()
-            if self.num == 25:
-                if player.godmod:
-                    player.health = player.before_health
-                    player.power += 30
-                    self.cool = 0
-                    self.draw_cool = 0
-            if self.num == 26:
-                self.pos = player.pos
-                count = 295-self.cool
-                if count <= 30: self.radius = count*8
-                elif big_small(count,50,110): self.radius -= 3
-                elif big_small(count,120,180): self.radius += 18
-                if when_time(count , 0): s_cat1.play()
-                if when_time(count , 50): s_ch0.play()
-                if when_time(count , 120): s_boom.play()
-                if count >= 240:self.radius -= 18
-                for enemy in enemy_group.sprites():
-                    if distance(self.pos,enemy.pos) <= self.radius//2:
-                        enemy.health -= 2
-                if distance(self.pos,boss.pos) <= self.radius//2:
-                    boss.health -= 2
-                for enemy in spr.sprites():
-                    if distance(self.pos,(enemy.pos[0]//2,enemy.pos[1]//2)) <= self.radius//2:
-                        item_group.add(Item(enemy.pos,1))
-                        enemy.kill()
+
         if not self.cool == 0:self.cool -= 1
         if not self.draw_cool == 0:self.draw_cool -= 1
     def draw(self,screen):
-        if self.num == 1 or  self.num == 23:
-            pygame.draw.circle(screen, (255,0,0,self.draw_cool*3),self.pos, 64)
+        if self.num == 1:
+            pygame.draw.circle(screen, (255,0,0,100),player.pos, 64)
+            pygame.draw.circle(screen, (255,0,0,50),player.pos, 40)
         if self.num == 2:
-            pygame.draw.circle(screen, (255,0,0,self.draw_cool*3),self.pos, 50)
+            pygame.draw.circle(screen, (52, 204, 235,200),player.pos, 50)
         if self.num == 3:
             pygame.draw.circle(screen, (0,0,255,self.draw_cool*1),self.pos, 200)
-        if self.num == 6:
-            pygame.draw.rect(screen, (0,0,255,self.draw_cool*3), Rect(0,self.pos[1]-20+(60-self.draw_cool)//3,WIDTH,10+self.draw_cool//2), width=0)
-        if self.num == 9:
-            pygame.draw.circle(screen, (0,255,0,150),self.pos, 40)
-        if self.num == 11:
-            pygame.draw.circle(screen, (255,255,0,self.draw_cool*3),self.pos, 80)
-        if self.num == 13:
-            pygame.draw.circle(screen, (0,255,0,100),player.pos, self.draw_cool)
-        if self.num == 14:
-            pygame.draw.circle(screen, (255,0,255,210),player.pos, round(self.draw_cool/2),2)
-        if self.num == 15:
-            pygame.draw.circle(screen, (255,0,255,100),self.pos, 9)
-            pygame.draw.circle(screen, (255,0,255,210),self.pos, round(self.draw_cool/8),1)
-        if self.num == 16:
-            pygame.draw.circle(screen, (255,255,0,210),player.pos, round(self.draw_cool/2),2)
-        if self.num == 17: 
-            if drilling:pygame.draw.circle(screen, (255,255,0,210-self.draw_cool),player.pos, 240-self.draw_cool*2,4)   
-        if self.num == 18:
-            pygame.draw.circle(screen, (0,0,0,50),player.pos, 300) 
-            pygame.draw.circle(screen, (0,0,0,100),player.pos, 400,100) 
-        if self.num == 19:
-            pygame.draw.circle(screen, (255,0,255,200),player.pos, 50,25)  
-            pygame.draw.circle(screen, (255,0,255,100),player.pos, 100,50)  
-            pygame.draw.circle(screen, (255,0,255,50),player.pos, 200,100)  
-            pygame.draw.circle(screen, (255,0,255,25),player.pos, 400,200)
-        if self.num == 21:
-            if while_time(self.cool,2):
-                pygame.draw.rect(screen, (125, 87, 22,200), boss_movebox)  
-        if self.num == 22:
-            pygame.draw.circle(screen, (255,0,0,self.draw_cool*3),self.pos, 50)
-        if self.num == 24:
-            count = self.max_cool - self.cool
-            if count < 60:
-                pygame.draw.rect(screen, (255,255,255,200), Rect(player.pos[0]-1,player.pos[1]-1,WIDTH*2,2))
-            else:
-                pygame.draw.rect(screen, (255,255,255,200), Rect(player.pos[0]-100,player.pos[1]-100,WIDTH*2,200))
-                pygame.draw.rect(screen, (255, 248, 115,200), Rect(player.pos[0]-50,player.pos[1]-50,WIDTH*2,100))
-        if self.num == 25:
-            pygame.draw.circle(screen, (0, 166, 255,180), player.pos, 50)
-        if self.num == 26:
-            pygame.draw.circle(screen, (255, 100, 215,180), player.pos, self.radius//2)
+
 # 탄
 class Bullet(pygame.sprite.Sprite):    
     def __init__(self, x, y, direction, speed, bul, col, mod, num=(0,0)):
@@ -980,7 +785,8 @@ class Bullet(pygame.sprite.Sprite):
         self.fade = True
     def size_change(self,size):
         self.radius += size/2
-        self.image = pygame.transform.scale(self.image2, (self.rect.width+size, self.rect.height+size))        
+        self.image = pygame.transform.scale(self.image2, (self.rect.width+size, self.rect.height+size))    
+        if self.lotate: self.image = pygame.transform.rotate(self.image, round(self.direction-90))    
         self.rect = self.image.get_rect(center = (self.pos[0],self.pos[1]))
 class MagicField(pygame.sprite.Sprite):
     def __init__(self, pos, direction, speed, mod, screen_die = 0):
@@ -1210,8 +1016,7 @@ cur_count = 0
 time_stop = False
 stage_count = 0
 screen_shake_count = 0
-add_dam = 0
-drilling = False
+all_trig = False
 game_clear = False   
 curser = 0
 curser_max = 4
@@ -1250,15 +1055,16 @@ item_group = pygame.sprite.Group()
 
 starting = True
 read_end = False
-player.skill_list.append(Skill(8,2,st.other[0],st.other[1],2,90,80))
-player.skill_list.append(Skill(10,0,st.other[2],st.other[3],3,5,50))
-player.skill_list.append(Skill(17,10,st.other[4],st.other[5],5,120,80))
+player.skill_list.append(sv.Skill(1,2,st.other[0],st.other[1],2,90,80))
+player.skill_list.append(sv.Skill(2,0,st.other[2],st.other[3],2,90,50))
+player.skill_list.append(sv.Skill(3,10,st.other[4],st.other[5],5,120,80))
 
 stages = [[(1,2),(3,1),(2,3),(6,7),(7,8),(8,6),(1,8),(2,6),(3,7)],\
         [(12,13),(13,27) ,(14,28),(12,27),(14,13),(14,12),(12,28),(28,13),(14,27)],\
         [(15,16),(16,30),(22,23),(23,24),(22,24),(15,22),(24,30) ,(23,16),(30,15),(30,22) ],\
           [(15,16),(16,30),(22,23),(23,24),(22,24),(15,22),(24,30) ,(23,16),(30,15),(30,22) ]  ,\
               [(11,34),(31,32),(31,11),(32,34),(32,11),(31,34)],\
-                  [(9,10),(20,21),(20,9),(21,10),(10,20),(21,9)]]
+                  [(9,10),(20,21),(20,9),(21,10),(10,20),(21,9)],\
+                      [(17,18),(25,26),(26,17),(25,18),(17,25),(26,18)]]
 
 stage_playing = (1,2)

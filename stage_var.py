@@ -82,6 +82,7 @@ class Player(pygame.sprite.Sprite):
 
             # 탄에 닿았을때
             if len(collide) > 0 and not self.godmod and not collide[0].ghost:
+                if not collide[0].radius >= 19: collide[0].kill()
                 s_pldead.play()
                 self.godmod = True
                 self.before_health = self.health
@@ -828,7 +829,7 @@ class MagicField(pygame.sprite.Sprite):
         elif self.screen_die == 2 and near_border.colliderect(self.rect):
             self.screen_die = 0   
 class Effect(pygame.sprite.Sprite):
-    def __init__(self, pos, num, col=0):
+    def __init__(self, pos, num, col=0, speed=0, dir=0):
         pygame.sprite.Sprite.__init__(self) # 초기화?
         self.image = pygame.Surface((32, 32), pygame.SRCALPHA) # 이미지          
         self.rect = self.image.get_rect(center = (round(pos[0]), round(pos[1])))
@@ -837,6 +838,12 @@ class Effect(pygame.sprite.Sprite):
         self.count = 0
         self.num = num
         self.col = col
+        self.speed = speed
+        self.direction = dir
+        if self.num == 33:
+            self.image = pygame.Surface((128,128), pygame.SRCALPHA) # 이미지   
+            pygame.draw.circle(self.image, (0,0,0,100), (64,64), 64)
+            pygame.draw.circle(self.image, (0,0,0), (64,64), 60)
 
     def update(self):
         if self.num == 1: # 적 사망 파란 포켓볼
@@ -875,6 +882,10 @@ class Effect(pygame.sprite.Sprite):
             self.count += 6
             if self.count >= 255:self.kill() 
             self.image = white_circle[self.col][256-self.count]                    
+        if self.num == 33: # 암흑
+            self.pos = calculate_new_xy(self.pos,self.speed,-self.direction)
+            if not self.rect.colliderect(small_border): self.kill()
+
         if self.num == 99:
             self.count += 1
             try:self.image = black_screen[self.count-1]   
@@ -958,17 +969,7 @@ class UI():
         self.ui_img = pygame.transform.scale(self.ui_img, (200, 40))
 
     def draw(self):
-        if boss2.health > 0: # 보스 체력바 그리기
-            try:
-                drawArc(up_render_layer, (0, 0, 0), boss2.pos, 80, 5, 360*100,255 if distance(player.pos,boss2.pos) >= 100 else 50)
-                drawArc(up_render_layer, health_color(boss2.health/boss.max_health), boss2.pos, 79, 3, 360*boss2.health/boss2.max_health,255 if distance(player.pos,boss2.pos) >= 100 else 50)
-            except:pass
-        if boss.health > 0: # 보스 체력바 그리기
-            try:
-                drawArc(up_render_layer, (0, 0, 0), boss.pos, 80, 5, 360*100,255 if distance(player.pos,boss.pos) >= 100 else 50)
-                drawArc(up_render_layer, health_color(boss.health/boss.max_health), boss.pos, 79, 3, 360*boss.health/boss.max_health,255 if distance(player.pos,boss.pos) >= 100 else 50)
-            except:pass  
-
+        
         st.score_text = st.score_font.render(str(st.score).zfill(10), True, (255,255,255))
         up_render_layer.blit(st.score_text,(WIDTH-160,0))            
 class Under_PI():
@@ -986,6 +987,18 @@ class Under_PI():
             render_layer.blit(self.slow_image, self.rect.topleft)
             self.slow_count += 1
             if self.slow_count >= len(st.slow_player_circle): self.slow_count = 0
+
+        if boss2.health > 0: # 보스 체력바 그리기
+            try:
+                drawArc(render_layer, (0, 0, 0), boss2.pos, 80, 5, 360*100,255 if distance(player.pos,boss2.pos) >= 100 else 50)
+                drawArc(render_layer, health_color(boss2.health/boss.max_health), boss2.pos, 79, 3, 360*boss2.health/boss2.max_health,255 if distance(player.pos,boss2.pos) >= 100 else 50)
+            except:pass
+        if boss.health > 0: # 보스 체력바 그리기
+            try:
+                drawArc(render_layer, (0, 0, 0), boss.pos, 80, 5, 360*100,255 if distance(player.pos,boss.pos) >= 100 else 50)
+                drawArc(render_layer, health_color(boss.health/boss.max_health), boss.pos, 79, 3, 360*boss.health/boss.max_health,255 if distance(player.pos,boss.pos) >= 100 else 50)
+            except:pass
+        
         if starting and not read_end and player.health > 0: # 원형 체력바 그리기
             psi = player.pos
             drawArc(render_layer, (100, 194, 247), psi, 45, 2, 360*player.gatcha/player.gatcha_max,150)
@@ -1065,6 +1078,9 @@ stages = [[(1,2),(3,1),(2,3),(6,7),(7,8),(8,6),(1,8),(2,6),(3,7)],\
           [(15,16),(16,30),(22,23),(23,24),(22,24),(15,22),(24,30) ,(23,16),(30,15),(30,22) ]  ,\
               [(11,34),(31,32),(31,11),(32,34),(32,11),(31,34)],\
                   [(9,10),(20,21),(20,9),(21,10),(10,20),(21,9)],\
-                      [(17,18),(25,26),(26,17),(25,18),(17,25),(26,18)]]
+                      [(17,18),(25,26),(26,17),(25,18),(17,25),(26,18)],\
+                          [(17,18),(25,26),(26,17),(25,18),(17,25),(26,18)],\
+                              [(19,33),(25,26),(26,17),(25,18),(17,25),(26,18)],\
+                                  [(4,5),(29,35),(26,17),(25,18),(17,25),(26,18)]]
 
 stage_playing = (1,2)

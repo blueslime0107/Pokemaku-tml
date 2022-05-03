@@ -1,11 +1,9 @@
 from numpy import s_
 import start as st
-from start import WIDTH,HEIGHT, bg_image, pokemons, boss_movebox, small_border, BGM1,BGM2,BGM3,BGM4,BGM5,BGM6, BGM7
+from start import WIDTH,HEIGHT, bg_image, pokemons,BGM1,BGM2,BGM3,BGM4,BGM5,BGM6,BGM7,BGM8,BGM9,BGM10 
 from spec_func import *
 import stage_var as sv
-import pygame, math
-from random import randint, choice
-from start import s_lazer1, s_enep2, s_ch0,  s_tan1, s_tan2, s_boom
+import pygame
 from norm_func import *
 from boss import boss_file, boss_levelup
 
@@ -65,7 +63,7 @@ def game_defalt_setting(fun): # 게임 스테이지 배경 정하기
     if fun == 6:
         st.bkgd_list.append(sv.Back_Ground(bg_image,(0,1800,540,360),5))
         st.bkgd_list.append(sv.Back_Ground(bg_image,(540,2070,540,90),3))
-    if fun == 7:
+    if fun == 7 or fun == 8 or fun == 9 or fun == 10:
         st.bkgd_list.append(sv.Back_Ground(bg_image,(0,1800,540,360),5))
         st.bkgd_list.append(sv.Back_Ground(bg_image,(540,2070,540,90),3))
 
@@ -86,6 +84,12 @@ def game_music_setting(fun):
             pygame.mixer.music.load(BGM6)
         if fun == 7:
             pygame.mixer.music.load(BGM7)
+        if fun == 8:
+            pygame.mixer.music.load(BGM8)
+        if fun == 9:
+            pygame.mixer.music.load(BGM9)
+        if fun == 10:
+            pygame.mixer.music.load(BGM10)
         pygame.mixer.music.play(-1)
         sv.music_playing = True
     else:

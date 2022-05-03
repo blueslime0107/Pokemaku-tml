@@ -8,7 +8,7 @@ import stage_var as sv
 from norm_func import *
 from spec_func import background_scroll
 from start import render_layer, WIDTH, HEIGHT, TITLE, FONT_1, FONT_2, score_font, menu_img, monitor_size, up_render_layer,skill_surface, debug_font
-from start import s_boom, s_cancel, s_cat1, s_ch0, s_ch2, s_damage0, s_damage1, s_enedead, s_enep1, s_enep2, s_graze, s_item0, s_kira0, s_kira1, s_lazer1, s_kak,s_ok, s_pause, s_pldead, s_plst0, s_select, s_slash, s_tan1, s_tan2, s_piyo, s_shoot, s_nodam
+from start import s_boom, s_cancel, s_cat1, s_ch0, s_ch2, s_dark,s_damage0, s_damage1, s_enedead, s_enep1, s_enep2, s_graze, s_item0, s_kira0, s_kira1, s_lazer1, s_kak,s_ok, s_pause, s_pldead, s_plst0, s_select, s_slash, s_tan1, s_tan2, s_piyo, s_shoot, s_nodam
 from stage import stage_manager, game_music_setting
 # 게임에 핵심적인 기능만 주석을 넣었습니다 ##
 
@@ -47,6 +47,7 @@ def music_and_sfx_volume(m,s):
     s_shoot.set_volume(s)
     s_nodam.set_volume(s)
     s_kak.set_volume(s*1.5)
+    s_dark.set_volume(s*1.5)
 def all_reset(reset):
     if not reset:
         sv.music_playing = False #
@@ -176,7 +177,7 @@ def play_game():
                 break
             
             # 탄에 박았는가
-            hit_list = pygame.sprite.spritecollide(sv.player_hitbox, sv.spr, not sv.player.godmod, pygame.sprite.collide_circle)
+            hit_list = pygame.sprite.spritecollide(sv.player_hitbox, sv.spr, False, pygame.sprite.collide_circle)
             sv.boss.rect.center = get_new_pos(sv.boss.rect.center,-50)     
             sv.boss2.rect.center = get_new_pos(sv.boss2.rect.center,-50)             
             boss_collide = pygame.sprite.spritecollide(sv.boss, sv.beams_group, False, pygame.sprite.collide_circle)            
@@ -230,8 +231,9 @@ def play_game():
                     if (not sv.player.died):sv.player_group.draw(render_layer) 
                     sv.enemy_group.draw(render_layer)            
                     if not sv.starting or sv.read_end: sv.enemy_group.draw(render_layer)
-                    sv.boss_group.draw(render_layer)
                     sv.under_ui.draw(keys)
+                    sv.boss_group.draw(render_layer)
+                    
                     screen.blit(pygame.transform.scale2x(render_layer),(0,0))                    
                     sv.spr.draw(screen)
                     up_render_layer.fill((255,255,255,0))

@@ -115,6 +115,7 @@ s_piyo = pygame.mixer.Sound('resources\Music\SFX\se_piyo.wav')
 s_shoot = pygame.mixer.Sound('resources\Music\SFX\se_focusfix.wav')
 s_nodam = pygame.mixer.Sound('resources\Music\SFX\se_nodamage.wav')
 s_kak = pygame.mixer.Sound('resources\Music\SFX\se_nice.wav')
+s_dark = pygame.mixer.Sound('resources\Music\SFX\se_boon01.wav')
 FONT_1 = 'resources\Font\SEBANG Gothic Bold.ttf' 
 FONT_2 = 'resources\Font\SEBANG Gothic.ttf'
 FIELD_1 = 'resources\Music\BGM\\1Stage.wav'
@@ -125,6 +126,9 @@ BGM4 = 'resources\Music\BGM\stage4.wav'
 BGM5 = 'resources\Music\BGM\stage5.wav'
 BGM6 = 'resources\Music\BGM\stage6.wav'
 BGM7 = 'resources\Music\BGM\stage7.wav'
+BGM8 = 'resources\Music\BGM\stage8.wav'
+BGM9 = 'resources\Music\BGM\stage9.wav'
+BGM10 = 'resources\Music\BGM\stage10.wav'
 TITLE = 'resources\Music\BGM\Menu.wav'
 
 tan_channel = pygame.mixer.Channel(0)

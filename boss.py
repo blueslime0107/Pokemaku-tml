@@ -1,7 +1,8 @@
+from re import L
 from norm_func import *
 from spec_func import set_go_boss, add_effect, bullet, look_at_player, bullet_effect, magic_bullet, sbullet, sbullet_effect, slook_at_player
 from random import randint, choice
-from start import s_boom, s_cancel, s_cat1, s_kak,s_ch0, s_ch2, s_damage0, s_damage1, s_enedead, s_enep1, s_enep2, s_graze, s_item0, s_kira0, s_kira1, s_lazer1, s_ok, s_pause, s_pldead, s_plst0, s_select, s_slash, s_tan1, s_tan2, s_piyo, s_shoot, s_nodam
+from start import s_boom, s_cancel, s_cat1, s_dark,s_kak,s_ch0, s_ch2, s_damage0, s_damage1, s_enedead, s_enep1, s_enep2, s_graze, s_item0, s_kira0, s_kira1, s_lazer1, s_ok, s_pause, s_pldead, s_plst0, s_select, s_slash, s_tan1, s_tan2, s_piyo, s_shoot, s_nodam
 from start import WIDTH, HEIGHT, small_border
 import stage_var as sv
 import start as st
@@ -50,6 +51,52 @@ def boss_file(num,pos,boss,count):
                 set_go_boss(4,choice([-90,90]),60,boss)
         if count > 240:
             count = 0   
+    if num == 4: # 뮤츠
+        boss.box_disable = True
+        if while_time(count,90):
+            bullet_effect(s_enep2,2,pos)
+            bullet(pos,look_at_player(pos),10,3,2,4)
+            for i in range(7,10):
+                bullet(pos,look_at_player(pos)+randint(-9,9),i,15,2)
+                bullet(pos,look_at_player(pos)+randint(-9,9),i-0.5,15,2)
+            for i in range(4,7):
+                bullet(pos,look_at_player(pos)+randint(-9,9),i,2,2)
+                bullet(pos,look_at_player(pos)+randint(-9,9),i-0.5,2,2)
+            for i in range(1,4):
+                bullet(pos,look_at_player(pos)+randint(-9,9),i,12,2)
+                bullet(pos,look_at_player(pos)+randint(-9,9),i-0.5,12,2)
+        if while_time(count+60,180):
+            set_go_boss(18,-look_at_player(pos),30,boss)
+            boss.list[0] = look_at_player(pos)
+        if while_time(count,180):
+            add_effect(pos,5)
+            for j in range(0,360,45):
+                bullet(pos,j,10,3,2,4.1)
+                for i in range(7,10):
+                    bullet(pos,j+randint(-9,9),i,15,2)
+                    bullet(pos,j+randint(-9,9),i-0.5,15,2)
+                for i in range(4,7):
+                    bullet(pos,j+randint(-9,9),i,2,2)
+                    bullet(pos,j+randint(-9,9),i-0.5,2,2)
+                for i in range(1,4):
+                    bullet(pos,j+randint(-9,9),i,12,2)
+                    bullet(pos,j+randint(-9,9),i-0.5,12,2)
+            s_kak.play()
+    if num == 5: # 뮤
+        boss.box_disable = True
+        if when_time(count,1):
+            set_go_boss(3,-look_at_player(pos),60,boss)
+        if while_time(count,6) and big_small(count,60,240):
+            for i in range(0,360,120):
+                bullet_effect(s_tan1,0,0,True)
+                bullet(calculate_new_xy(pos,1000,-i-count*2.3,True),i+180+count*2.3,5,14,randint(1,7),5,pos)
+        if when_time(count,420):
+            sv.screen_shake_count = 20
+            s_enep2.play()
+            s_dark.play()
+            bullet(pos,look_at_player(pos),0,3,2,5.1)
+        if when_time(count,700):
+            count = 0
     if num == 6: # 라이코
         if while_time(count+180,240):
             bullet(pos,0,6,15,6,6)
@@ -175,6 +222,24 @@ def boss_file(num,pos,boss,count):
             #     for j in range(0,360,10):
             #         bullet(calculate_new_xy(pos,50,i,True),j,4,3,7)
             magic_bullet((WIDTH,HEIGHT),180,14,18)    
+    if num == 19: # 레쿠쟈
+        boss.box_disable = True
+        if while_time(count,2) and big_small(count,0,150):
+            ran = randint(0,45)
+            for i in range(0,360,45):
+                poi = calculate_new_xy(pos,100,-i-ran,True)
+                bullet_effect(s_tan1,5,poi)
+                bullet(poi,i+ran,8,17,5)
+        if when_time(count,120):
+            s_enep2.play()
+            bullet(pos,look_at_player(pos),18,1,4,19)
+            set_go_boss(18,-look_at_player(pos),30,boss)
+            boss.list[0] = look_at_player(pos)
+        if when_time(count,150):
+            add_effect(pos,5)
+            s_kak.play()
+        if when_time(count,240):
+            count = 0  
     if num == 20: # 지라치
         if while_time(count,2) and boss.list[0] < 540 and big_small(count,1,61):
             bullet_effect(s_tan1,2,(540-boss.list[0],0))
@@ -340,6 +405,13 @@ def boss_file(num,pos,boss,count):
             set_go_boss(2,choice([-90,90]),120,boss)
         if when_time(count,240):
             count = 0
+    if num == 33:
+        if while_time(count+400,420):
+            s_dark.play()
+            for i in range(0,360,20):
+                add_effect(calculate_new_xy(sv.player.pos,100,-i,True),33,0,2,i)
+                magic_bullet(calculate_new_xy(sv.player.pos,100,-i,True),i,4,33)
+            add_effect(pos,33,0,2,look_at_player(pos))
     if num == 34: # 쉐이미
         if when_time(count+180,240):
             add_effect(pos,8)
@@ -382,6 +454,23 @@ def bullet_type(self,mod,sub):
             for i in range(0,360,180):
                 sbullet(self.pos,i+rand,3,9,6)       
             self.kill()
+    if mod == 4:
+        if sub == 0:
+            if self.count == 0: self.size_change(180)
+            self.count += 1
+        if sub == 1:
+            if self.count == 0: self.size_change(90)
+            self.count += 1
+    if mod == 5:
+        self.count += 1
+        self.screen_die = 2
+        if sub == 0:
+            if distance(double(self.pos,True),self.num) <= 2: self.kill()
+        if sub == 1:
+            if big_small(self.count,0,30): self.size_change(25)
+            if big_small(self.count,30,210): self.size_change(1)
+            if big_small(self.count,210,270): self.size_change(-15)
+            if self.count == 270: self.kill()
     if mod == 6:
         if self.pos[0] >= WIDTH*2:
             if self.count == 0: 
@@ -507,7 +596,9 @@ def bullet_type(self,mod,sub):
             self.speed = 0
         if self.count == 240: 
             self.speed = -self.num
-
+    if mod == 19:
+        if self.count == 0: self.size_change(180)
+        self.count += 1
 
     if mod == 21:
         self.size_change(2)
@@ -527,22 +618,25 @@ def bullet_type(self,mod,sub):
                 sbullet(self.pos,look_at_player(double(sv.player.pos)),1,19,2)
             self.kill()
     if mod == 26:
+        
         if sub == 0:
-            if self.count == 0:
-                self.size_change(80)
             self.count += 1
+            if self.count == 1:
+                self.size_change(80)            
             if while_time(self.count,2):
                 sbullet_effect(s_tan1,6,self.pos)
                 sbullet(self.pos,self.direction,0,9,6,26.1)
                 sbullet(self.pos,self.direction,0,9,6,26.2)
         if sub == 1 and sv.all_trig:
-            if not self.speed == 4:
-                self.direction += 90
-                self.speed = 4
+            self.count += 1
+            if self.count == 1:self.direction += 90
+            if self.speed <= 4:               
+                self.speed += 0.2
         if sub == 2 and sv.all_trig:
-            if not self.speed == 4:
-                self.direction -= 90
-                self.speed = 4
+            self.count += 1
+            if self.count == 1:self.direction -= 90
+            if self.speed <= 4:               
+                self.speed += 0.2
     if mod == 27:
         self.count += 1
         if self.count > 240:
@@ -574,7 +668,7 @@ def bullet_type(self,mod,sub):
             self.speed -= 2
         if self.count >= 180:
             self.screen_die = 0
-
+    
     
     if mod == 34:
         self.count += 1
@@ -653,7 +747,12 @@ def magic_type(self,mod):
             rand = randint(0,30)
             for i in range(0,360,30):                
                 bullet(self.pos,i+rand,3,15,1)
-
+    if mod == 33:
+        self.count += 1
+        if while_time(self.count,20):
+            bullet_effect(s_tan2,0,self.pos,True)
+            bullet(self.pos,randint(0,360),randfloat(1,2),3,2)
+            bullet(self.pos,randint(0,360),randfloat(1,2),3,2)
 
 def boss_levelup(num,pos,boss,count):
     if num == 1: # 프리져

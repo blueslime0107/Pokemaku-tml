@@ -45,8 +45,8 @@ def sbullet_effect(sound,col,pos,only_sound = False):
         elif sound == s_lazer1:lazer_channel.play(sound)
         else:sound.play()
     if not only_sound:add_effect((pos[0]/2,pos[1]/2),2,col)
-def add_effect(pos,num,col=0):
-    sv.effect_group.add(sv.Effect(pos,num,col))
+def add_effect(pos,num,col=0,spd=0,dir=0):
+    sv.effect_group.add(sv.Effect(pos,num,col,spd,dir))
 def magic_bullet(pos,dir,speed,mode=0,screend=0):
     sv.magic_spr.add(sv.MagicField(pos,dir,speed/2,mode,screend))
 def look_at_player(pos):

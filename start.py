@@ -26,6 +26,7 @@ bg_image = pygame.image.load('resources\Image\Bg1.png').convert_alpha()
 bg2_image = pygame.image.load('resources\Image\Bg2.png').convert_alpha()
 pkmon_image = pygame.image.load('resources\Image\pokemon.png').convert_alpha()
 background_img = pygame.image.load('resources\Image\\background.jpg').convert()
+background2_img = pygame.image.load('resources\Image\\background2.png').convert()
 menu_img = pygame.image.load('resources\Image\Menus.png').convert_alpha()
 item_img = pygame.image.load('resources\Image\item.png').convert_alpha()
 skill_img = pygame.image.load('resources\Image\skill.png').convert_alpha()
@@ -116,6 +117,9 @@ s_shoot = pygame.mixer.Sound('resources\Music\SFX\se_focusfix.wav')
 s_nodam = pygame.mixer.Sound('resources\Music\SFX\se_nodamage.wav')
 s_kak = pygame.mixer.Sound('resources\Music\SFX\se_nice.wav')
 s_dark = pygame.mixer.Sound('resources\Music\SFX\se_boon01.wav')
+s_good = pygame.mixer.Sound('resources\Music\SFX\se_bonus2.wav')
+s_release = pygame.mixer.Sound('resources\Music\SFX\se_release.wav')
+s_invalid = pygame.mixer.Sound('resources\Music\SFX\se_invalid.wav')
 FONT_1 = 'resources\Font\SEBANG Gothic Bold.ttf' 
 FONT_2 = 'resources\Font\SEBANG Gothic.ttf'
 FIELD_1 = 'resources\Music\BGM\\1Stage.wav'
@@ -144,6 +148,10 @@ enep_channel = pygame.mixer.Channel(9)
 died_channel = pygame.mixer.Channel(10)
 damage_channel = pygame.mixer.Channel(11)
 lazer_channel = pygame.mixer.Channel(12)
+dark_channel = pygame.mixer.Channel(13)
+sound_channel = []
+for i in range(14,60):
+    sound_channel.append(pygame.mixer.Channel(i))
 a_list = []
 cur_list = []
 if True:
@@ -197,6 +205,18 @@ if True:
         image.blit(bullet_image, (0,0), Rect(i*64,432,64,64))
         image = pygame.transform.scale2x(image)
         a_list.append(image)
+        a_list.append(image)
+    cur_list.append(a_list)
+    a_list = []
+    for j in range (0,256,64):
+        image = pygame.Surface((64, 64), pygame.SRCALPHA)
+        image.blit(bullet_image, (0,0), Rect(j,496,64,64))
+        image = pygame.transform.scale2x(image)
+        a_list.append(image)
+    for j in range (0,256,64):
+        image = pygame.Surface((64, 64), pygame.SRCALPHA)
+        image.blit(bullet_image, (0,0), Rect(j,560,64,64))
+        image = pygame.transform.scale2x(image)
         a_list.append(image)
     cur_list.append(a_list)
     a_list = []
@@ -388,6 +408,6 @@ bullet_border = Rect(0-bullet_border_wide, 0-bullet_border_wide, WIDTH*2 + bulle
 small_border = Rect(0, 0, WIDTH*2, HEIGHT*2)
 near_border= Rect(0, 0, WIDTH, HEIGHT)
 far_border= Rect(-50, -50, WIDTH+100, HEIGHT+100)
-bullet_size = (10,6,8,8,6,6,6,9,6,7,7,4,5,15,15,20,10,10,10,20)
+bullet_size = (10,6,8,8,6,6,6,9,6,7,7,4,5,15,15,20,10,10,10,20,15)
 game_restart = False
 effect_group = 0  

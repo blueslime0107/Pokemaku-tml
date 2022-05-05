@@ -3,7 +3,7 @@ from norm_func import *
 from spec_func import set_go_boss, add_effect, bullet, look_at_player, bullet_effect, magic_bullet, sbullet, sbullet_effect, slook_at_player
 from random import randint, choice
 from start import s_boom, s_cancel, s_cat1, s_dark,s_kak,s_ch0, s_ch2, s_damage0, s_damage1, s_enedead, s_enep1, s_enep2, s_graze, s_item0, s_kira0, s_kira1, s_lazer1, s_ok, s_pause, s_pldead, s_plst0, s_select, s_slash, s_tan1, s_tan2, s_piyo, s_shoot, s_nodam
-from start import WIDTH, HEIGHT, small_border
+from start import WIDTH, HEIGHT, small_border, dark_channel , lazer_channel
 import stage_var as sv
 import start as st
 import pygame
@@ -55,7 +55,7 @@ def boss_file(num,pos,boss,count):
         boss.box_disable = True
         if while_time(count,90):
             bullet_effect(s_enep2,2,pos)
-            bullet(pos,look_at_player(pos),10,3,2,4)
+            bullet(pos,look_at_player(pos),10,20,2,4)
             for i in range(7,10):
                 bullet(pos,look_at_player(pos)+randint(-9,9),i,15,2)
                 bullet(pos,look_at_player(pos)+randint(-9,9),i-0.5,15,2)
@@ -71,7 +71,7 @@ def boss_file(num,pos,boss,count):
         if while_time(count,180):
             add_effect(pos,5)
             for j in range(0,360,45):
-                bullet(pos,j,10,3,2,4.1)
+                bullet(pos,j,10,20,2,4.1)
                 for i in range(7,10):
                     bullet(pos,j+randint(-9,9),i,15,2)
                     bullet(pos,j+randint(-9,9),i-0.5,15,2)
@@ -94,7 +94,7 @@ def boss_file(num,pos,boss,count):
             sv.screen_shake_count = 20
             s_enep2.play()
             s_dark.play()
-            bullet(pos,look_at_player(pos),0,3,2,5.1)
+            bullet(pos,look_at_player(pos),0,20,2,5.1)
         if when_time(count,700):
             count = 0
     if num == 6: # 라이코
@@ -362,6 +362,12 @@ def boss_file(num,pos,boss,count):
             bullet_effect(s_enep2,0,0,True)
             for i in range(0,HEIGHT+24,24):
                 bullet((WIDTH,i),180,3,19,randint(0,7),28,sv.player.pos[0]*2)
+    if num == 29: # 기라티나
+        if while_time(count+180,240):
+            bullet(pos,look_at_player(pos),2,20,6,29)
+            dark_channel.play(s_dark)
+        if while_time(count+140,240):
+            set_go_boss(1,randint(0,360),50,boss)
     if num == 30: # 크레세리아
         if while_time(count,2) and count < 60:
             bullet_effect(s_tan1,2,pos)
@@ -405,7 +411,7 @@ def boss_file(num,pos,boss,count):
             set_go_boss(2,choice([-90,90]),120,boss)
         if when_time(count,240):
             count = 0
-    if num == 33:
+    if num == 33: # 다크라이
         if while_time(count+400,420):
             s_dark.play()
             for i in range(0,360,20):
@@ -421,8 +427,15 @@ def boss_file(num,pos,boss,count):
                 bullet(pos,i+randint(-10,10),1,11,5,34,i)
         if when_time(count,360):
             count = 0
-            
-    
+    if num == 35: # 아르세우스
+        if while_time(count,90):
+            bullet_effect(s_tan1,6,pos)
+            ran = randint(0,360)
+            for i in range(0,360,4):            
+                bullet(pos,i+ran,4,3,6,35,2)
+                bullet(pos,i+ran,4,3,6,35,-2)
+        if while_time(count,120):
+            set_go_boss(1,randint(0,360),50,boss)
     
     return count
 
@@ -645,6 +658,43 @@ def bullet_type(self,mod,sub):
     if mod == 28:
         if self.pos[0] <= self.num and self.speed > 0:
             self.speed -= 0.5
+    if mod == 29:
+        if sub == 0:
+            self.count += 1
+            if self.count < 30:self.size_change(10)    
+            if self.num == 0:
+                for bul in sv.spr.sprites():
+                    if not bul == self:
+                        if not bul.mod == 29.1:
+                            if distance(self.pos,bul.pos) <= self.radius:
+                                sbullet_effect(s_tan1,1,bul.pos)
+                                sbullet(bul.pos,randint(0,360),randfloat(2,5),3,1,29.1)
+                                sbullet(bul.pos,randint(0,360),randfloat(2,5),3,1,29.1)
+                                sbullet(bul.pos,randint(0,360),randfloat(2,5),3,1,29.1)
+                                bul.kill()
+                                if self.count > 30:
+                                    self.size_change(-5)
+                                    if self.radius <= 10:
+                                        self.num = 1
+            if not sv.small_border.collidepoint(self.pos) or self.num > 0:
+                self.num += 1
+                if self.num <= 2: 
+                    lazer_channel.play(s_lazer1)
+                    bullet_effect(s_enep2,0,0,True)
+                    self.speed = 0
+                sbullet_effect(0,1,self.pos)
+                for i in range(0,360,60):
+                    sbullet(self.pos,i+15,15,0,1)
+                for i in range(0,360,60):
+                    sbullet(self.pos,i+45,15,0,6)
+                if self.num > 120: self.kill()
+            
+            
+
+
+            # if self.count > 30: self.size_change(-10)
+
+
     if mod == 32:
         self.screen_die = 1
         self.count += 1
@@ -678,7 +728,10 @@ def bullet_type(self,mod,sub):
                 sbullet(self.pos,look_at_player(double(self.pos,True))+5*i,7-0.5*i,1,4)
                 sbullet(self.pos,look_at_player(double(self.pos,True))-5*i,7-0.5*i,1,4)
             self.kill()
-
+    if mod == 35:
+        self.count += 1
+        if big_small(self.count,20,80):
+            self.direction += self.num
 
 
 

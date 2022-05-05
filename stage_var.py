@@ -1,11 +1,12 @@
+from numpy import SHIFT_INVALID
 import pygame, math
 from random import randint
 from pygame.locals import *
 import start as st
 from start import render_layer,bullets, WIDTH, HEIGHT, small_border, FONT_1, font1, bullet_border, pokemons, items,near_border, boss_movebox,screen_rect, up_render_layer,far_border
 from start import magic_circle_sprite, white_circle, died_white_circle,bullet_erase,boss_circle,bullet_size
-from start import s_boom, s_cat1, s_ch0, s_ch2, s_damage0, s_damage1, s_enedead, s_enep1, s_graze, s_item0, s_pldead, s_plst0, s_tan1, s_tan2,s_piyo,s_shoot, s_nodam
-from start import item_channel, plst_channel, graze_channel ,enemy_boom_channel, black_screen, enemy_died_circle, bullet_taning, died_channel, damage_channel
+from start import s_boom, s_cat1, s_ch0, s_ch2, s_damage0, s_damage1, s_enedead, s_good,s_enep1, s_graze, s_item0, s_invalid,s_pldead, s_plst0, s_tan1, s_tan2,s_piyo,s_shoot, s_nodam
+from start import item_channel, plst_channel, graze_channel ,enemy_boom_channel, black_screen, enemy_died_circle, bullet_taning, died_channel, damage_channel, sound_channel
 from stage import boss_attack
 from boss import bullet_type, bullet_levelup, magic_type
 from start import WIDTH, HEIGHT
@@ -86,13 +87,15 @@ class Player(pygame.sprite.Sprite):
                 s_pldead.play()
                 self.godmod = True
                 self.before_health = self.health
-                self.health -= round(collide[0].radius/2 * 7 * (collide[0].speed/2+1))
+                damage = round(collide[0].radius/2 * 7 * (collide[0].speed/2+1))
+                self.health -= damage
                 if self.gihapetii and self.health <= 0:
                     self.health=1
                     self.gihapetii = False
                 self.hit_speed = 5
                 self.hit_dir = -collide[0].direction
-                self.godmod_count = 120
+                self.godmod_count = round(2*damage//4) # 데미지마다 무적시간 변경
+                if self.godmod_count > 70: self.godmod_count = 70
                 self.max_godmod_count = self.godmod_count
             
             # 무적이면 2초뒤 풀리기
@@ -104,7 +107,7 @@ class Player(pygame.sprite.Sprite):
             
             self.gatcha += 0.1
             if self.gatcha >= self.gatcha_max and self.gatcha < self.gatcha_max+60: 
-                s_piyo.play()
+                sound_channel[0].play(s_piyo)
                 self.gatcha += 999
             
             # 넉백
@@ -227,28 +230,28 @@ class Beam(pygame.sprite.Sprite):
         self.appear = True
         self.died = False
         self.effect = False
-        if self.num == 0: # 뮤 메인
+        if self.num == 0: # 메인
             self.image.fill((82,140,255))
             pygame.draw.rect(self.image, (82,181,255), (1,1,18,14),0)
             self.speed = 40
-            self.damage = 5
-        if self.num == 2: # 세레비 메인
+            self.damage = 1
+        if self.num == 2: # 서브
             self.image.fill((247,165,165))
             pygame.draw.rect(self.image, (239,99,107), (0,0,20,16),2)
             self.speed = 40
-            self.damage = 3
+            self.damage = 2
         if self.num == 4: # 포켓몬
             s_shoot.play()
             self.image = pygame.Surface((20, 20), pygame.SRCALPHA)
             pygame.draw.circle(self.image, 'red', (10,10), 10)
             self.speed = 0
-            self.damage = 200
+            self.damage = 250
             player.gatcha = 0
-        if self.num == 5:
+        if self.num == 5: # 얼음
             self.image = pygame.Surface((25, 16), pygame.SRCALPHA)
             self.image.fill((97, 231, 255,200))
             self.speed = 50
-            self.damage = 10
+            self.damage = 4
             self.rect = self.image.get_rect(center = get_new_pos(self.pos))  
         #self.image.fill((255, 255, 255, 150), special_flags=pygame.BLEND_RGBA_MULT)
         self.image = pygame.transform.rotate(self.image, self.direction)
@@ -259,6 +262,7 @@ class Beam(pygame.sprite.Sprite):
             if self.appear:
                 if self.num == 4:
                     player.gatcha = player.gatcha_max//2
+                    sound_channel[2].play(s_invalid)
                 self.kill()
         else:
             self.appear = True
@@ -268,11 +272,21 @@ class Beam(pygame.sprite.Sprite):
             self.kill()
         if self.died:
             if self.effect:
-                self.image.fill((255,255,255,100))
+                if self.a ==0:
+                    if self.num == 4:
+                        self.image = pygame.Surface((128,128), pygame.SRCALPHA) 
+                        self.rect = self.image.get_rect(center = get_new_pos(self.pos))  
+                        pygame.draw.circle(self.image, 'red', (64,64), 64)
+                    else:
+                        self.image.fill((255,255,255,100))
+                self.image.fill((255, 255, 255,250), special_flags=pygame.BLEND_RGBA_MULT)
                 self.speed=0
                 self.a += 1
                 if self.a > 40: self.kill()
             else:                
+                if self.num == 4: 
+                    sound_channel[3].play(s_good)
+                    sound_channel[1].play(st.s_release)
                 self.effect = True
         self.pos = calculate_new_xy(self.pos, self.speed, -self.direction)
         self.rect = self.image.get_rect(center = get_new_pos(self.pos))  
@@ -671,7 +685,7 @@ class Skill_Core(): # 스킬 능력 구현
             if self.num == 1: # 주변 탄 삭제
                 self.pos = player.pos
                 for bul in spr.sprites():
-                    if distance(double(self.pos),bul.pos) <= 128 and not bul.shape[0] == 19:
+                    if distance(double(self.pos),bul.pos) <= 128 and not bul.shape[0] == 19 and not bul.shape[0] == 20:
                         add_effect(double(bul.pos,True),7,bul.shape[1])
                         item_group.add(Item(bul.pos,1))
                         bul.kill()
@@ -680,12 +694,20 @@ class Skill_Core(): # 스킬 능력 구현
             if self.num == 2: # 쪼기
                 beams_group.add(Beam(player.pos,5))
             if self.num == 3: # 바람일으키기
-                if self.cool == self.max_cool:self.pos = player.pos
-                for enemy in enemy_group.sprites():
-                    if distance(self.pos,enemy.pos) <= 200:
-                        enemy.pos = calculate_new_xy(enemy.pos,2,-look_at_player(enemy.pos)+180)
-                if distance(self.pos,boss.pos) <= 200 and boss.move_ready:
-                    boss.pos = calculate_new_xy(boss.pos,2,-look_at_player(boss.pos)+180)
+                if player.godmod: 
+                    sound_channel[3].play(s_invalid)
+                    self.cool = 0
+                    self.draw_cool = 0
+                    for bul in spr.sprites():
+                        if distance(player.pos,double(bul.pos,True)) < 300:
+                            bul.pos = double(bul.pos,True)
+                            add_effect(bul.pos,7,bul.shape[1])
+                            item_group.add(Item(bul.pos,1))
+                            bul.kill()
+                if self.cool == 1:
+                    sound_channel[4].play(s_good)
+                    player.health += 100
+                    if player.health > player.max_health: player.health = player.max_health
 
         if not self.cool == 0:self.cool -= 1
         if not self.draw_cool == 0:self.draw_cool -= 1
@@ -696,7 +718,7 @@ class Skill_Core(): # 스킬 능력 구현
         if self.num == 2:
             pygame.draw.circle(screen, (52, 204, 235,200),player.pos, 50)
         if self.num == 3:
-            pygame.draw.circle(screen, (0,0,255,self.draw_cool*1),self.pos, 200)
+            pygame.draw.circle(screen, (0,255,0,100),player.pos, self.draw_cool)
 
 # 탄
 class Bullet(pygame.sprite.Sprite):    
@@ -720,7 +742,7 @@ class Bullet(pygame.sprite.Sprite):
         self.mod = mod
         self.num = num
         self.grazed = True
-        self.lotate = False if bul == 2 or bul == 3 or bul == 10 or bul==11 or bul == 12 or bul == 15 or bul == 10 or bul == 14 or bul == 19 else True   
+        self.lotate = False if bul == 2 or bul == 3 or bul == 10 or bul==11 or bul == 12 or bul == 15 or bul == 10 or bul == 14 or bul == 19 or bul == 20 else True   
         if self.lotate: 
             self.image = pygame.transform.rotate(self.image2, round(self.direction-90))
             self.rect = self.image.get_rect(center = (int(self.pos[0]),int(self.pos[1])))
@@ -753,14 +775,14 @@ class Bullet(pygame.sprite.Sprite):
         dist = distance(self.pos,(player.pos[0]*2,player.pos[1]*2))
 
         # 플레이어가 탄을 스치면 추가점수
-        if self.grazed and dist <= 40+self.radius and not player.godmod:
+        if self.grazed and dist <= 80+self.radius: #and not player.godmod:
             graze_channel.play(s_graze)
             st.score += st.score_setting[3]
             player.skill_list[player.skill_pointer].refill += 1
             self.grazed = False    
             if player.gatcha < player.gatcha_max: 
                 player.gatcha += 1   
-        if self.fade and dist <= 100+self.radius:
+        if self.fade and dist <= 200+self.radius:
             self.fade = False
             bullet_effect(s_kira1,self.shape[1],double(self.pos,True))
             self.change_shape(self.shape[0],self.shape[1])
@@ -919,12 +941,8 @@ class Item(pygame.sprite.Sprite):
             if self.pos[0] < -10:
                 self.kill() 
             # 플레이어 범위 작으면 먹기
-            
-            # 좌표 600이상이면 플레이어 다라가기
-            if player.pos[0] >= 300 and not self.lock:
-                self.lock = True
-            if self.lock:
-                self.pos = calculate_new_xy(self.pos,13,-look_at_player(self.pos))
+
+            self.pos = calculate_new_xy(self.pos,18,-look_at_player(self.pos))
 
         if distance(self.pos,player.pos) < 35:
             if self.num == 0: 
@@ -932,24 +950,9 @@ class Item(pygame.sprite.Sprite):
                 if player.gatcha < player.gatcha_max: player.gatcha += 1 # 먹으면 파워업
                 st.score += st.score_setting[1]
             if self.num == 1:
-                st.score += st.score_setting[0]
-            if self.num == 2:
-                if player.health < player.max_health: player.health += 5
-                else: player.health = player.max_health
-                st.score += st.score_setting[1]//5
-            if self.num == 3:
-                if player.health < player.max_health: player.health += 50
-                else: player.health = player.max_health
-                st.score += st.score_setting[1]//2
-            if self.num == 4:
-                if player.skill_list[player.skill_pointer].pp < player.skill_list[player.skill_pointer].max_pp: player.skill_list[player.skill_pointer].pp+=1
-                st.score += st.score_setting[0]
-            if self.num == 5:
-                if player.mp < 8: player.mp += 1
-                if player.skill_list[player.skill_pointer].pp < player.skill_list[player.skill_pointer].max_pp: player.skill_list[player.skill_pointer].pp+=1
-                st.score += st.score_setting[0]*5
-            if self.num == 6:
-                player.power = 450
+                st.score += st.score_setting[2]
+                if player.gatcha < player.gatcha_max: 
+                    player.gatcha += 1  
             item_channel.play(s_item0)
             self.kill()
 
@@ -978,16 +981,17 @@ class Under_PI():
         self.rect = self.slow_image.get_rect(center = get_new_pos(player.pos))
         self.slow_count = 0
         self.pos = player.pos
+        self.count = [0,0,0]
 
     def draw(self, keys):
         if keys[pygame.K_LSHIFT]:
             self.pos = player.pos
+            
             self.slow_image = st.slow_player_circle[self.slow_count]
             self.rect = self.slow_image.get_rect(center = get_new_pos(self.pos))
             render_layer.blit(self.slow_image, self.rect.topleft)
             self.slow_count += 1
             if self.slow_count >= len(st.slow_player_circle): self.slow_count = 0
-
         if boss2.health > 0: # 보스 체력바 그리기
             try:
                 drawArc(render_layer, (0, 0, 0), boss2.pos, 80, 5, 360*100,255 if distance(player.pos,boss2.pos) >= 100 else 50)
@@ -1001,7 +1005,21 @@ class Under_PI():
         
         if starting and not read_end and player.health > 0: # 원형 체력바 그리기
             psi = player.pos
-            drawArc(render_layer, (100, 194, 247), psi, 45, 2, 360*player.gatcha/player.gatcha_max,150)
+            if not player.gihapetii:
+                drawArc(render_layer, (255,0,0), psi, 100, 2, 360,255)
+                drawArc(render_layer, (255,0,0), psi, 95, 2, 360,255)
+            drawArc(render_layer, (0,255,0), psi, 38 + round(math.sin(math.radians(self.count[1]*5))*3), 4, 360,150)
+            drawArc(render_layer, (0,255,0), psi, 38, 2, 360,200)
+            self.count[1] += 1
+            # 포켓몬 게이지
+            if player.gatcha < player.gatcha_max:
+                drawArc(render_layer, (100, 194, 247), psi, 45, 10, 360*player.gatcha/player.gatcha_max,200)
+            else:
+                self.count[0] += 1 # 빈도 포켓볼 깜빡거림
+                if self.count[0] < 10:
+                    drawArc(render_layer, (100, 194, 247), psi, 45, 10, 360*player.gatcha/player.gatcha_max,200)
+                if self.count[0] == 20: self.count[0] = 0
+            # 플레이어 체력
             if player.godmod: drawArc(render_layer, (0, 194, 247), psi, 58, 11, 360*player.godmod_count/player.max_godmod_count,255)
             drawArc(render_layer, (0,0,0), psi, 56, 8, 360*100,120 if not player.godmod else 255)
             if player.godmod: drawArc(render_layer, health_color(player.health/player.max_health), psi, 55, 5, 360*player.before_health/player.max_health,120)
@@ -1079,8 +1097,8 @@ stages = [[(1,2),(3,1),(2,3),(6,7),(7,8),(8,6),(1,8),(2,6),(3,7)],\
               [(11,34),(31,32),(31,11),(32,34),(32,11),(31,34)],\
                   [(9,10),(20,21),(20,9),(21,10),(10,20),(21,9)],\
                       [(17,18),(25,26),(26,17),(25,18),(17,25),(26,18)],\
-                          [(17,18),(25,26),(26,17),(25,18),(17,25),(26,18)],\
-                              [(19,33),(25,26),(26,17),(25,18),(17,25),(26,18)],\
-                                  [(4,5),(29,35),(26,17),(25,18),(17,25),(26,18)]]
+                          [(17,18),(25,26),(26,17),(25,18),(17,25),(26,18)]]#,\
+                      #        [(19,33),(25,26),(26,17),(25,18),(17,25),(26,18)],\
+                     #             [(4,5),(29,35),(4,29),(35,5),(35,4),(5,29)]]
 
 stage_playing = (1,2)

@@ -7,8 +7,8 @@ import start as st
 import stage_var as sv
 from norm_func import *
 from spec_func import background_scroll
-from start import render_layer, WIDTH, HEIGHT, TITLE, FONT_1, FONT_2, score_font, menu_img, monitor_size, up_render_layer,skill_surface, debug_font
-from start import s_boom, s_cancel, s_cat1, s_ch0, s_ch2, s_dark,s_damage0, s_damage1, s_enedead, s_enep1, s_enep2, s_graze, s_item0, s_kira0, s_kira1, s_lazer1, s_kak,s_ok, s_pause, s_pldead, s_plst0, s_select, s_slash, s_tan1, s_tan2, s_piyo, s_shoot, s_nodam
+from start import render_layer, WIDTH, HEIGHT, TITLE, FONT_1, FONT_2, score_font, menu_img, monitor_size, up_render_layer,skill_surface, debug_font, sound_channel
+from start import s_boom, s_cancel, s_release,s_cat1, s_invalid,s_ch0, s_ch2, s_dark,s_damage0, s_good,s_damage1, s_enedead, s_enep1, s_enep2, s_graze, s_item0, s_kira0, s_kira1, s_lazer1, s_kak,s_ok, s_pause, s_pldead, s_plst0, s_select, s_slash, s_tan1, s_tan2, s_piyo, s_shoot, s_nodam
 from stage import stage_manager, game_music_setting
 # 게임에 핵심적인 기능만 주석을 넣었습니다 ##
 
@@ -28,7 +28,7 @@ def music_and_sfx_volume(m,s):
     s_cat1.set_volume(s)
     s_enep1.set_volume(s)
     s_enep2.set_volume(s)
-    s_slash.set_volume(s)
+    s_slash.set_volume(s*2)
     s_pldead.set_volume(s)
     s_plst0.set_volume(s)
     s_damage0.set_volume(s*2)
@@ -46,8 +46,11 @@ def music_and_sfx_volume(m,s):
     s_piyo.set_volume(s*2)
     s_shoot.set_volume(s)
     s_nodam.set_volume(s)
+    s_release.set_volume(s*0.5)
     s_kak.set_volume(s*1.5)
     s_dark.set_volume(s*1.5)
+    s_good.set_volume(s*2)
+    s_invalid.set_volume(s*2)
 def all_reset(reset):
     if not reset:
         sv.music_playing = False #
@@ -99,12 +102,13 @@ def all_reset(reset):
         st.score = 0    
         sv.stage_fun -= 1
         sv.stage_playing = sv.stages[sv.stage_fun][sv.stage_challenge] 
-    sv.player.skill_list.append(sv.Skill(1,3,st.other[0],st.other[1],2,90,80))
-    sv.player.skill_list.append(sv.Skill(2,2,st.other[2],st.other[3],3,90,50))
-    sv.player.skill_list.append(sv.Skill(3,10,st.other[4],st.other[5],5,120,80))
+    sv.player.skill_list.append(sv.Skill(1,4,st.other[0],st.other[1],2,90,200))
+    sv.player.skill_list.append(sv.Skill(2,5,st.other[2],st.other[3],3,90,50))
+    sv.player.skill_list.append(sv.Skill(3,0,st.other[4],st.other[5],5,120,80))
 
 def play_game():
     global screen
+    all_reset(False)
     music_and_sfx_volume(st.music_volume,st.sfx_volume)    
     count = 0
     bgx = 0
@@ -134,7 +138,8 @@ def play_game():
                                 sv.beams_group.add(sv.Beam(get_new_pos(sv.player.pos,5),4))
                             if sv.player.shoot_gatcha == 0:
                                 sv.player.shoot_gatcha = 20                                                            
-                        if (ev.key == pygame.K_x or ev.key == pygame.K_c) and sv.player.skill_list[sv.player.skill_pointer].pp > 0:
+                        if (ev.key == pygame.K_x or ev.key == pygame.K_c) and sv.player.skill_list[sv.player.skill_pointer].pp > 0 and not sv.skill_activating and not sv.player.godmod:
+                            sound_channel[1].play(s_slash)
                             sv.player.skill_list[sv.player.skill_pointer].pp -= 1       
                             sv.skill_activating.append(sv.Skill_Core(sv.player.skill_list[sv.player.skill_pointer].num,sv.player.skill_list[sv.player.skill_pointer].cool))
                         if ev.key == pygame.K_d:
@@ -372,17 +377,52 @@ def play_game():
             if st.game_restart:
                 sv.frame_count = 0
                 break    
-
+            
+            # 배경과 폴리곤
             rel_x = bgx % WIDTH
             render_layer.blit(st.background_img, (rel_x - WIDTH,0))
             if rel_x < WIDTH:
-                render_layer.blit(st.background_img,(rel_x,0))  
+                render_layer.blit(st.background_img,(rel_x,0))
+
+            rel_x = bgx % 1022
+            sub_bg = pygame.Surface((1022,82), SRCALPHA)
+            sub_bg.blit(st.background2_img, (rel_x - 1022,0))    
+            if rel_x < 1022:
+                sub_bg.blit(st.background2_img,(rel_x,0)) 
+            sub_bg = pygame.transform.rotate(sub_bg, 85) 
+            sub_bg.fill((0, 0, 255, 150), special_flags=pygame.BLEND_RGBA_MULT)
+            render_layer.blit(sub_bg,(0,-50))
+
+            rel_x = -bgx % 1022
+            sub_bg = pygame.Surface((1022,82), SRCALPHA)
+            sub_bg.blit(st.background2_img, (rel_x - 1022,0))    
+            if rel_x < 1022:
+                sub_bg.blit(st.background2_img,(rel_x,0)) 
+            sub_bg = pygame.transform.rotate(sub_bg, -5) 
+            sub_bg.fill((0, 0, 255, 150), special_flags=pygame.BLEND_RGBA_MULT)
+            render_layer.blit(sub_bg,(0,50))
+
+            rel_x = bgx % 1022
+            sub_bg = pygame.Surface((1022,82), SRCALPHA)
+            sub_bg.blit(st.background2_img, (rel_x - 1022,0))    
+            if rel_x < 1022:
+                sub_bg.blit(st.background2_img,(rel_x,0)) 
+            sub_bg = pygame.transform.rotate(sub_bg, 30) 
+            sub_bg.fill((0, 0, 255, 150), special_flags=pygame.BLEND_RGBA_MULT)
+            render_layer.blit(sub_bg,(0,-50))
+
             bgx += 1         
             ui_x = WIDTH - 220
             ui_y = 150
             count += 1
-            render_layer.blit(st.poligon, (10,150+math.sin(math.pi * (count*2 / 180)) * 5))
 
+            poli_mask = pygame.mask.from_surface(st.poligon)
+            poli_mask = poli_mask.to_surface()
+            poli_mask.set_colorkey((0,0,0))
+            poli_mask.fill((0,0,255), special_flags=pygame.BLEND_RGBA_MULT)
+            render_layer.blit(poli_mask, (10,150+math.sin(math.radians(count*2)) * 5))
+
+            # 그리기
             if sv.select_mod == 0: # 시작화면
                 curser_max = 4
                 render_layer.blit(st.title_img,(0,0))# 타이틀
@@ -396,7 +436,7 @@ def play_game():
                     curser_max = len(sv.stages[sv.stage_fun])-1
                     if sv.curser > curser_max: sv.curser = curser_max
                     text_color = (0,0,255)
-                    text1 = score_font.render("Day"+str(sv.stage_fun+1), True, text_color)
+                    text1 = score_font.render("BOX"+str(sv.stage_fun+1), True, text_color)
                     render_layer.blit(text1,(240,50))
                     for i in range(0,len(sv.stages[sv.stage_fun])):
                         text_color = (255,0,255) if i == sv.curser else (0,0,255)

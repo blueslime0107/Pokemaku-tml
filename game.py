@@ -1,3 +1,4 @@
+from re import I
 import pygame, math
 from random import randint
 from pygame.locals import *
@@ -8,7 +9,7 @@ import stage_var as sv
 from norm_func import *
 from spec_func import background_scroll
 from start import render_layer, WIDTH, HEIGHT, TITLE, FONT_1, FONT_2, score_font, menu_img, monitor_size, up_render_layer,skill_surface, debug_font, sound_channel
-from start import s_boom, s_cancel, s_release,s_cat1, s_invalid,s_ch0, s_ch2, s_dark,s_damage0, s_good,s_damage1, s_enedead, s_enep1, s_enep2, s_graze, s_item0, s_kira0, s_kira1, s_lazer1, s_kak,s_ok, s_pause, s_pldead, s_plst0, s_select, s_slash, s_tan1, s_tan2, s_piyo, s_shoot, s_nodam
+from start import s_boom,s_life, s_cancel, s_release,s_cat1, s_invalid,s_ch0, s_ch2, s_dark,s_damage0, s_good,s_damage1, s_enedead, s_enep1, s_enep2, s_graze, s_item0, s_kira0, s_kira1, s_lazer1, s_kak,s_ok, s_pause, s_pldead, s_plst0, s_select, s_slash, s_tan1, s_tan2, s_piyo, s_shoot, s_nodam
 from stage import stage_manager, game_music_setting
 # 게임에 핵심적인 기능만 주석을 넣었습니다 ##
 
@@ -20,6 +21,8 @@ def music_and_sfx_volume(m,s):
     try:m = m/100
     except:m = 0
     pygame.mixer.music.set_volume(m)
+    s_life.set_volume(s*1.5)
+    st.s_piyo2.set_volume(s*0.5)
     s_lazer1.set_volume(s)
     s_tan1.set_volume(s)
     s_tan2.set_volume(s)
@@ -275,7 +278,7 @@ def play_game():
             
             text_color = (255,255,255)
             text1 = debug_font.render(str(len(sv.spr.sprites())), True, text_color)
-            screen.blit(text1,(800,700)) 
+            screen.blit(text1,(980,650)) 
             
             pygame.display.flip()       
         if sv.cur_screen == 0:
@@ -379,48 +382,49 @@ def play_game():
                 break    
             
             # 배경과 폴리곤
-            rel_x = bgx % WIDTH
-            render_layer.blit(st.background_img, (rel_x - WIDTH,0))
-            if rel_x < WIDTH:
-                render_layer.blit(st.background_img,(rel_x,0))
+            if True:
+                rel_x = bgx % WIDTH
+                render_layer.blit(st.background_img, (rel_x - WIDTH,0))
+                if rel_x < WIDTH:
+                    render_layer.blit(st.background_img,(rel_x,0))
 
-            rel_x = bgx % 1022
-            sub_bg = pygame.Surface((1022,82), SRCALPHA)
-            sub_bg.blit(st.background2_img, (rel_x - 1022,0))    
-            if rel_x < 1022:
-                sub_bg.blit(st.background2_img,(rel_x,0)) 
-            sub_bg = pygame.transform.rotate(sub_bg, 85) 
-            sub_bg.fill((0, 0, 255, 150), special_flags=pygame.BLEND_RGBA_MULT)
-            render_layer.blit(sub_bg,(0,-50))
+                rel_x = bgx % 1022
+                sub_bg = pygame.Surface((1022,82), SRCALPHA)
+                sub_bg.blit(st.background2_img, (rel_x - 1022,0))    
+                if rel_x < 1022:
+                    sub_bg.blit(st.background2_img,(rel_x,0)) 
+                sub_bg = pygame.transform.rotate(sub_bg, 85) 
+                sub_bg.fill((0, 0, 255, 150), special_flags=pygame.BLEND_RGBA_MULT)
+                render_layer.blit(sub_bg,(0,-50))
 
-            rel_x = -bgx % 1022
-            sub_bg = pygame.Surface((1022,82), SRCALPHA)
-            sub_bg.blit(st.background2_img, (rel_x - 1022,0))    
-            if rel_x < 1022:
-                sub_bg.blit(st.background2_img,(rel_x,0)) 
-            sub_bg = pygame.transform.rotate(sub_bg, -5) 
-            sub_bg.fill((0, 0, 255, 150), special_flags=pygame.BLEND_RGBA_MULT)
-            render_layer.blit(sub_bg,(0,50))
+                rel_x = -bgx % 1022
+                sub_bg = pygame.Surface((1022,82), SRCALPHA)
+                sub_bg.blit(st.background2_img, (rel_x - 1022,0))    
+                if rel_x < 1022:
+                    sub_bg.blit(st.background2_img,(rel_x,0)) 
+                sub_bg = pygame.transform.rotate(sub_bg, -5) 
+                sub_bg.fill((0, 0, 255, 150), special_flags=pygame.BLEND_RGBA_MULT)
+                render_layer.blit(sub_bg,(0,50))
 
-            rel_x = bgx % 1022
-            sub_bg = pygame.Surface((1022,82), SRCALPHA)
-            sub_bg.blit(st.background2_img, (rel_x - 1022,0))    
-            if rel_x < 1022:
-                sub_bg.blit(st.background2_img,(rel_x,0)) 
-            sub_bg = pygame.transform.rotate(sub_bg, 30) 
-            sub_bg.fill((0, 0, 255, 150), special_flags=pygame.BLEND_RGBA_MULT)
-            render_layer.blit(sub_bg,(0,-50))
+                rel_x = bgx % 1022
+                sub_bg = pygame.Surface((1022,82), SRCALPHA)
+                sub_bg.blit(st.background2_img, (rel_x - 1022,0))    
+                if rel_x < 1022:
+                    sub_bg.blit(st.background2_img,(rel_x,0)) 
+                sub_bg = pygame.transform.rotate(sub_bg, 30) 
+                sub_bg.fill((0, 0, 255, 150), special_flags=pygame.BLEND_RGBA_MULT)
+                render_layer.blit(sub_bg,(0,-50))
 
-            bgx += 1         
-            ui_x = WIDTH - 220
-            ui_y = 150
-            count += 1
+                bgx += 1         
+                ui_x = WIDTH - 220
+                ui_y = 150
+                count += 1
 
-            poli_mask = pygame.mask.from_surface(st.poligon)
-            poli_mask = poli_mask.to_surface()
-            poli_mask.set_colorkey((0,0,0))
-            poli_mask.fill((0,0,255), special_flags=pygame.BLEND_RGBA_MULT)
-            render_layer.blit(poli_mask, (10,150+math.sin(math.radians(count*2)) * 5))
+                poli_mask = pygame.mask.from_surface(st.poligon)
+                poli_mask = poli_mask.to_surface()
+                poli_mask.set_colorkey((0,0,0))
+                poli_mask.fill((0,0,255), special_flags=pygame.BLEND_RGBA_MULT)
+                render_layer.blit(poli_mask, (10,150+math.sin(math.radians(count*2)) * 5))
 
             # 그리기
             if sv.select_mod == 0: # 시작화면
@@ -439,9 +443,28 @@ def play_game():
                     text1 = score_font.render("BOX"+str(sv.stage_fun+1), True, text_color)
                     render_layer.blit(text1,(240,50))
                     for i in range(0,len(sv.stages[sv.stage_fun])):
-                        text_color = (255,0,255) if i == sv.curser else (0,0,255)
+                        
+                        text_color = (246, 255, 0) if list(sv.stages[sv.stage_fun][i]) in st.score_index  else  (0,0,255)
+                        if i == sv.curser: text_color = (255,0,255) 
                         text1 = score_font.render(str(sv.stage_fun+1) +"-"+str(i+1), True, text_color)
-                        render_layer.blit(text1,(240,60+25*(i+1)))                   
+                        render_layer.blit(text1,(240,60+25*(i+1)))  
+
+                    txtli = ["","",""]
+                    # 스코어 보드
+                    if list(sv.stages[sv.stage_fun][sv.curser]) in st.score_index: 
+                        asd = sv.stages[sv.stage_fun][sv.curser]
+                        txtli[0] = st.pk_name[asd[1]-1]    
+                        txtli[1] = st.pk_name[asd[0]-1] 
+                        txtli[2] = str(st.score_value[st.score_index.index(list(sv.stages[sv.stage_fun][sv.curser]))]).zfill(10)
+                    else: # 스코어 없으면 nan
+                        txtli = [st for st in ['NaN','NaN','NaN']]
+                    score_b = pygame.Surface((300,200), SRCALPHA)
+                    score_b.fill((0,0,0,200))
+                    render_layer.blit(score_b,(320,40))
+                    for i in range(0,3):
+                        text1 = score_font.render(txtli[i], True, (0,0,255))
+                        render_layer.blit(text1,(350,50+50*i))
+                   
                 if sv.menu_mod[0] == 1: # 설명
                     font = pygame.font.Font(FONT_2, 20)
                     pygame.draw.rect(render_layer, (0,0,0), (20,20,WIDTH-40,HEIGHT-40), width=0)

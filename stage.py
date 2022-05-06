@@ -11,6 +11,36 @@ from boss import boss_file, boss_levelup
 def end_challenge(time):
 
     if time == sv.stage_count and sv.stage_line == sv.stage_cline:
+        try:
+            edit = st.score_index.index([sv.stage_playing[0],sv.stage_playing[1]])
+            with open(st.score_text, "r", encoding="UTF-8") as t:
+                alines = t.readlines()
+            with open(st.score_text, "w", encoding="UTF-8") as t:
+                for line in alines:
+                    if edit == alines.index(line) and st.score > st.hiscore: 
+                        t.write(str(sv.stage_playing[0])+'_'+str(sv.stage_playing[1])+'_'+str(st.score)+"\n")
+                    else: t.write(line)
+        except:
+            with open(st.score_text, "r", encoding="UTF-8") as t:
+                alines = t.readlines()
+                alines.append('0')
+            with open(st.score_text, "w", encoding="UTF-8") as t:
+                for line in alines:
+                    if line == '0': 
+                        t.write("\n"+str(sv.stage_playing[0])+'_'+str(sv.stage_playing[1])+'_'+str(st.score))
+                    else: t.write(line)
+
+
+        st.score_index = []
+        st.score_value = []
+        with open(st.score_text, "r", encoding="UTF-8") as t:
+            lines = t.readlines()
+            for line in lines:
+                line = line.strip()
+                line = line.split('_')
+                st.score_index.append([int(line[0]),int(line[1])])
+                st.score_value.append(int(line[2]))
+            
         sv.pause_lock = True
         sv.pause = True  
         sv.curser = 0       
@@ -149,6 +179,8 @@ def stage_manager():
     if sv.stage_end <= 0:
         if True:
             if sv.stage_condition == 1:
+                if [sv.stage_playing[0],sv.stage_playing[1]] in st.score_index: st.hiscore = st.score_value[st.score_index.index([sv.stage_playing[0],sv.stage_playing[1]])]
+                else: st.hiscore = 0
                 add_effect((WIDTH/2,HEIGHT/2),99)
                 sv.stage_fun += 1
                 sv.stage_count = 0
@@ -171,11 +203,13 @@ def stage_manager():
                 sv.stage_count = 0
         if sv.stage_condition == 6:
             if not sv.boss.appear and not sv.boss.died_next_stage and not sv.boss2.died_next_stage: 
+                
                 stage_play()
                 title_spawn()
             if not (sv.boss.died_next_stage and sv.boss2.died_next_stage):
                 sv.stage_count -= 1
-            if sv.stage_count > 0:                
+            if sv.stage_count > 0:  
+
                 end_challenge(180) 
             sv.stage_cline = 0
     else:

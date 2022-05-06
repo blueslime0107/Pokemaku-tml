@@ -35,39 +35,45 @@ title_img = pygame.image.load('resources\Image\\title.png').convert_alpha()
 poligon = pygame.image.load('resources\Image\polligonz.png').convert_alpha()
 screen.blit(pygame.transform.scale2x(loding_img),(0,0))
 pygame.display.flip()
-text_text = open("resources\how_to_play.txt", 'r', encoding="UTF-8")
-text_credit = open("resources\credit.txt", 'r', encoding="UTF-8")
-score_text = open("resources\score.txt", 'r', encoding="UTF-8")
-pkm_text = open("resources\kor_pk_name.txt", 'r', encoding="UTF-8")
-other_txt = open("resources\kor_other.txt", 'r', encoding="UTF-8")
-text_scroll = []
-text_start = [0]
-a = 0
+text_text = "resources\how_to_play.txt"
+text_credit = "resources\credit.txt"
+pkm_text = "resources\kor_pk_name.txt"
+other_txt = "resources\kor_other.txt"
+
+score_text = "resources\score.txt"
+score_index = []
+score_value = []
+with open(score_text, "r", encoding="UTF-8") as t:
+    lines = t.readlines()
+    for line in lines:
+        line = line.strip()
+        line = line.split('_')
+        score_index.append([int(line[0]),int(line[1])])
+        score_value.append(int(line[2]))
 htp_scroll = []
+with open(text_text, "r", encoding="UTF-8") as t:
+    lines = t.readlines()
+    for line in lines:
+        line = line.strip()
+        htp_scroll.append(line)
 credit_scroll = []
-lines = text_text.readlines()
-for line in lines:
-    line = line.strip()
-    htp_scroll.append(line)
-lines = text_credit.readlines()
-for line in lines:
-    line = line.strip()
-    credit_scroll.append(line)
-score_scroll = []
-lines = score_text.readlines()
-for line in lines:
-    line = line.strip()
-    score_scroll.append(line)
+with open(text_credit, "r", encoding="UTF-8") as t:
+    lines = t.readlines()
+    for line in lines:
+        line = line.strip()
+        credit_scroll.append(line)
 pk_name = []
-lines = pkm_text.readlines()
-for line in lines:
-    line = line.strip()
-    pk_name.append(line)
+with open(pkm_text, "r", encoding="UTF-8") as t:
+    lines = t.readlines()
+    for line in lines:
+        line = line.strip()
+        pk_name.append(line)
 other = []
-lines = other_txt.readlines()
-for line in lines:
-    line = line.strip()
-    other.append(line)
+with open(other_txt, "r", encoding="UTF-8") as t:
+    lines = t.readlines()
+    for line in lines:
+        line = line.strip()
+        other.append(line)
 
 
 full_on = False
@@ -120,6 +126,8 @@ s_dark = pygame.mixer.Sound('resources\Music\SFX\se_boon01.wav')
 s_good = pygame.mixer.Sound('resources\Music\SFX\se_bonus2.wav')
 s_release = pygame.mixer.Sound('resources\Music\SFX\se_release.wav')
 s_invalid = pygame.mixer.Sound('resources\Music\SFX\se_invalid.wav')
+s_life = pygame.mixer.Sound('resources\Music\SFX\se_life1.wav')
+s_piyo2 = pygame.mixer.Sound('resources\Music\SFX\se_ufoalert.wav')
 FONT_1 = 'resources\Font\SEBANG Gothic Bold.ttf' 
 FONT_2 = 'resources\Font\SEBANG Gothic.ttf'
 FIELD_1 = 'resources\Music\BGM\\1Stage.wav'
@@ -396,6 +404,7 @@ TARGET_FPS = 60
 keys = pygame.key.get_pressed() 
 boss_movebox = Rect(300,35,204,292)
 score = 0
+hiscore = 0
 bkgd_list = []
 # 폰트 불러오기
 score_font = pygame.font.Font(FONT_1, 25)

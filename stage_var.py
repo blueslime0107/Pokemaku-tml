@@ -90,6 +90,7 @@ class Player(pygame.sprite.Sprite):
                 damage = round(collide[0].radius/2 * 7 * (collide[0].speed/2+1))
                 self.health -= damage
                 if self.gihapetii and self.health <= 0:
+                    sound_channel[6].play(st.s_life)
                     self.health=1
                     self.gihapetii = False
                 self.hit_speed = 5
@@ -971,10 +972,11 @@ class UI():
         self.ui_img.blit(self.ui_img,(0,0),(0,0,400,80))
         self.ui_img = pygame.transform.scale(self.ui_img, (200, 40))
 
-    def draw(self):
-        
-        st.score_text = st.score_font.render(str(st.score).zfill(10), True, (255,255,255))
-        up_render_layer.blit(st.score_text,(WIDTH-160,0))            
+    def draw(self):        
+        score_text = st.score_font.render(str(st.score).zfill(10), True, (255,255,255))
+        up_render_layer.blit(score_text,(WIDTH-160,0))    
+        score_text = st.score_font.render(str(st.hiscore).zfill(10), True, (46, 46, 46))
+        up_render_layer.blit(score_text,(WIDTH-160,HEIGHT-25))        
 class Under_PI():
     def __init__(self):
         self.slow_image = st.slow_player_circle[0]
@@ -1005,11 +1007,12 @@ class Under_PI():
         
         if starting and not read_end and player.health > 0: # 원형 체력바 그리기
             psi = player.pos
-            if not player.gihapetii:
-                drawArc(render_layer, (255,0,0), psi, 100, 2, 360,255)
-                drawArc(render_layer, (255,0,0), psi, 95, 2, 360,255)
-            drawArc(render_layer, (0,255,0), psi, 38 + round(math.sin(math.radians(self.count[1]*5))*3), 4, 360,150)
-            drawArc(render_layer, (0,255,0), psi, 38, 2, 360,200)
+            if not player.gihapetii:# 기합의띠 파괴
+                drawArc(render_layer, (255,0,0), psi, 100+ round(math.sin(math.radians(self.count[1]*5))*3), 2, 360,255)
+                drawArc(render_layer, (255,0,0), psi, 95+ round(math.sin(math.radians(self.count[1]*5))*3), 2, 360,255)
+                # 그레이즈
+            drawArc(render_layer, health_color(player.health/player.max_health), psi, 38 + round(math.sin(math.radians(self.count[1]*5))*3), 4, 360,150)
+            drawArc(render_layer, health_color(player.health/player.max_health), psi, 38, 2, 360,200)
             self.count[1] += 1
             # 포켓몬 게이지
             if player.gatcha < player.gatcha_max:
@@ -1018,7 +1021,9 @@ class Under_PI():
                 self.count[0] += 1 # 빈도 포켓볼 깜빡거림
                 if self.count[0] < 10:
                     drawArc(render_layer, (100, 194, 247), psi, 45, 10, 360*player.gatcha/player.gatcha_max,200)
-                if self.count[0] == 20: self.count[0] = 0
+                if self.count[0] == 20: 
+                    self.count[0] = 0
+                    sound_channel[0].play(st.s_piyo2)
             # 플레이어 체력
             if player.godmod: drawArc(render_layer, (0, 194, 247), psi, 58, 11, 360*player.godmod_count/player.max_godmod_count,255)
             drawArc(render_layer, (0,0,0), psi, 56, 8, 360*100,120 if not player.godmod else 255)

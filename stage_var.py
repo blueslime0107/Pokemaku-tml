@@ -1,4 +1,3 @@
-from numpy import SHIFT_INVALID
 import pygame, math
 from random import randint
 from pygame.locals import *
@@ -169,6 +168,7 @@ class Tittle():
             self.textfun(self.defalt[0],(35,35),0)
         if self.count > 60:
             if when_time(self.count,61):s_cat1.play()
+            pos = (100,220) if st.lang == 1 else (50,220)
             if self.bool:
                 self.textfun(self.name2,(50,40),1)
                 self.textfun(self.name1,(100,220),1)
@@ -178,7 +178,7 @@ class Tittle():
             if while_time(self.count,4):
                 if self.bool: self.bool = False
                 else: self.bool = True
-            self.textfun(self.defalt[1],(WIDTH-100,HEIGHT-100),0)
+            self.textfun(self.defalt[1],(WIDTH-100,HEIGHT-100) if st.lang == 1 else (WIDTH-250,HEIGHT-100),0)
             if self.count > 90: self.more = self.more*1.1
         self.count += 1
             
@@ -194,6 +194,11 @@ class Tittle():
     def textfun(self,texts,pos,mod):
         if mod == 0:
             oh = self.font1.render(texts,True,"white")
+            oh2 = self.font1.render(texts,True,(0,0,0))
+            render_layer.blit(oh2,get_new_pos(get_new_pos(pos,self.more),4,4))
+            render_layer.blit(oh2,get_new_pos(get_new_pos(pos,self.more),-4,4))
+            render_layer.blit(oh2,get_new_pos(get_new_pos(pos,self.more),4,-4))
+            render_layer.blit(oh2,get_new_pos(get_new_pos(pos,self.more),-4,-4))
             render_layer.blit(oh,get_new_pos(pos,self.more))
         if mod == 1:
             oh = self.font2.render(texts,True,(214,230,245))
@@ -243,8 +248,8 @@ class Beam(pygame.sprite.Sprite):
             self.damage = 2
         if self.num == 4: # 포켓몬
             s_shoot.play()
-            self.image = pygame.Surface((20, 20), pygame.SRCALPHA)
-            pygame.draw.circle(self.image, 'red', (10,10), 10)
+            self.image = pygame.Surface((48, 16), pygame.SRCALPHA)
+            self.image.blit(st.pokeball,(0,0))
             self.speed = 0
             self.damage = 250
             player.gatcha = 0
@@ -252,7 +257,7 @@ class Beam(pygame.sprite.Sprite):
             self.image = pygame.Surface((25, 16), pygame.SRCALPHA)
             self.image.fill((97, 231, 255,200))
             self.speed = 50
-            self.damage = 4
+            self.damage = 3
             self.rect = self.image.get_rect(center = get_new_pos(self.pos))  
         #self.image.fill((255, 255, 255, 150), special_flags=pygame.BLEND_RGBA_MULT)
         self.image = pygame.transform.rotate(self.image, self.direction)
@@ -287,7 +292,6 @@ class Beam(pygame.sprite.Sprite):
             else:                
                 if self.num == 4: 
                     sound_channel[3].play(s_good)
-                    sound_channel[1].play(st.s_release)
                 self.effect = True
         self.pos = calculate_new_xy(self.pos, self.speed, -self.direction)
         self.rect = self.image.get_rect(center = get_new_pos(self.pos))  
@@ -756,9 +760,8 @@ class Bullet(pygame.sprite.Sprite):
         mod, sub = math.trunc(self.mod), (self.mod*10)%10
         direc = self.direction
         #모드 값이 있으면 탄 속성 변화###############################################
-        #if levelup:bullet_levelup(self,mod,sub) 
-        #else:bullet_type(self,mod,sub)      
-        bullet_type(self,mod,sub)  
+        if levelup:bullet_levelup(self,mod,sub) 
+        else:bullet_type(self,mod,sub)        
         ################################################
                     
         if direc != self.direction and self.lotate:# 각도 계산후 위치 업데이트
@@ -796,14 +799,16 @@ class Bullet(pygame.sprite.Sprite):
         elif self.screen_die == 2 and small_border.colliderect(self.rect):
             self.screen_die = 0    
     def change_shape(self,bul,col):
-        self.image = bullets[bul][col] if not (bul == 10 or bul == 11 or bul == 14) else bullets[bul][col][0]
-        self.image2 = self.image.copy()
-        self.lotate = False if bul == 2 or bul == 3 or bul == 10 or bul==11 or bul == 12 or bul == 15 or bul == 10 or bul == 14 or bul == 19 else True   
-        if self.lotate: 
-            self.image = pygame.transform.rotate(self.image2, self.direction-90)
-            self.rect = self.image.get_rect(center = (int(self.pos[0]),int(self.pos[1])))
-        self.keeplotate = True if (bul == 10 or bul == 11 or bul == 14) else False
-        self.rect = self.image.get_rect(center = (round(self.pos[0]),round(self.pos[1])))
+        try:
+            self.image = bullets[bul][col] if not (bul == 10 or bul == 11 or bul == 14) else bullets[bul][col][0]
+            self.image2 = self.image.copy()
+            self.lotate = False if bul == 2 or bul == 3 or bul == 10 or bul==11 or bul == 12 or bul == 15 or bul == 10 or bul == 14 or bul == 19 else True   
+            if self.lotate: 
+                self.image = pygame.transform.rotate(self.image2, self.direction-90)
+                self.rect = self.image.get_rect(center = (int(self.pos[0]),int(self.pos[1])))
+            self.keeplotate = True if (bul == 10 or bul == 11 or bul == 14) else False
+            self.rect = self.image.get_rect(center = (round(self.pos[0]),round(self.pos[1])))
+        except: pass
     def hide(self):
         self.change_shape(self.shape[0],8)
         self.fade = True
@@ -1025,8 +1030,10 @@ class Under_PI():
                     self.count[0] = 0
                     sound_channel[0].play(st.s_piyo2)
             # 플레이어 체력
-            if player.godmod: drawArc(render_layer, (0, 194, 247), psi, 58, 11, 360*player.godmod_count/player.max_godmod_count,255)
-            drawArc(render_layer, (0,0,0), psi, 56, 8, 360*100,120 if not player.godmod else 255)
+            try:
+                if player.godmod: drawArc(render_layer, (0, 194, 247), psi, 58, 11, 360*player.godmod_count/player.max_godmod_count,255)
+                drawArc(render_layer, (0,0,0), psi, 56, 8, 360*100,120 if not player.godmod else 255)
+            except: pass
             if player.godmod: drawArc(render_layer, health_color(player.health/player.max_health), psi, 55, 5, 360*player.before_health/player.max_health,120)
             drawArc(render_layer, health_color(player.health/player.max_health), psi, 55, 5, 360*player.health/player.max_health,120 if not player.godmod else 255)
 class Back_Ground():
@@ -1096,13 +1103,13 @@ player.skill_list.append(sv.Skill(2,0,st.other[2],st.other[3],2,90,50))
 player.skill_list.append(sv.Skill(3,10,st.other[4],st.other[5],5,120,80))
 
 stages = [[(1,2),(3,1),(2,3),(6,7),(7,8),(8,6),(1,8),(2,6),(3,7)],\
-        [(12,13),(13,27) ,(14,28),(12,27),(14,13),(14,12),(12,28),(28,13),(14,27)],\
+        [(12,13),(13,27),(12,27),(14,13),(14,12),(14,27)],\
         [(15,16),(16,30),(22,23),(23,24),(22,24),(15,22),(24,30) ,(23,16),(30,15),(30,22) ],\
-          [(15,16),(16,30),(22,23),(23,24),(22,24),(15,22),(24,30) ,(23,16),(30,15),(30,22) ]  ,\
-              [(11,34),(31,32),(31,11),(32,34),(32,11),(31,34)],\
-                  [(9,10),(20,21),(20,9),(21,10),(10,20),(21,9)],\
-                      [(17,18),(25,26),(26,17),(25,18),(17,25),(26,18)],\
-                          [(17,18),(25,26),(26,17),(25,18),(17,25),(26,18)]]#,\
+          [(1,13),(2,14),(3,15),(12,7),(7,16),(23,27),(30,13) ,(1,1),(22,14),(30,2) ]]  #,\
+            #   [(11,34),(31,32),(31,11),(32,34),(32,11),(31,34)],\
+            #       [(9,10),(20,21),(20,9),(21,10),(10,20),(21,9)],\
+            #           [(17,18),(25,26),(26,17),(25,18),(17,25),(26,18)],\
+            #               [(17,18),(25,26),(26,17),(25,18),(17,25),(26,18)]]#,\
                       #        [(19,33),(25,26),(26,17),(25,18),(17,25),(26,18)],\
                      #             [(4,5),(29,35),(4,29),(35,5),(35,4),(5,29)]]
 

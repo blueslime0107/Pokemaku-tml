@@ -98,16 +98,16 @@ def all_reset(reset):
     sv.item_group = pygame.sprite.Group()
     sv.starting = True
     sv.read_end = False
+    st.score = 0  
     if reset:
         sv.pause_lock = False
         sv.player.skill_list = []
-        sv.player.power = 400
-        st.score = 0    
+        sv.player.power = 400          
         sv.stage_fun -= 1
         sv.stage_playing = sv.stages[sv.stage_fun][sv.stage_challenge] 
     sv.player.skill_list.append(sv.Skill(1,4,st.other[0],st.other[1],2,90,200))
-    sv.player.skill_list.append(sv.Skill(2,5,st.other[2],st.other[3],3,90,50))
-    sv.player.skill_list.append(sv.Skill(3,0,st.other[4],st.other[5],5,120,80))
+    sv.player.skill_list.append(sv.Skill(2,5,st.other[2],st.other[3],3,90,200))
+    sv.player.skill_list.append(sv.Skill(3,0,st.other[4],st.other[5],5,120,200))
 
 def play_game():
     global screen
@@ -467,24 +467,33 @@ def play_game():
                    
                 if sv.menu_mod[0] == 1: # 설명
                     font = pygame.font.Font(FONT_2, 20)
-                    pygame.draw.rect(render_layer, (0,0,0), (20,20,WIDTH-40,HEIGHT-40), width=0)
+                    score_b = pygame.Surface((WIDTH-40,HEIGHT-40), SRCALPHA)
+                    score_b.fill((0,0,0,200))
+                    render_layer.blit(score_b,(20,20))
                     for texta in range(0,len(st.htp_scroll)):
                         text1 = font.render(st.htp_scroll[texta], True, (255,255,255))
                         render_layer.blit(text1,(40,30*texta+30))
                 if sv.menu_mod[0] == 2: # 크레딧
+                    score_b = pygame.Surface((WIDTH-40,HEIGHT-40), SRCALPHA)
+                    score_b.fill((0,0,0,200))
+                    render_layer.blit(score_b,(20,20))
                     font = pygame.font.Font(FONT_2, 10)
-                    pygame.draw.rect(render_layer, (0,0,0), (20,20,WIDTH-40,HEIGHT-40), width=0)
                     for texta in range(0,len(st.credit_scroll)):
                         text1 = font.render(st.credit_scroll[texta], True, (255,255,255))
                         render_layer.blit(text1,(30,10*texta+30))
                 if sv.menu_mod[0] == 3: # 설정
                     curser_max = 2
                     text_box = ["Mod","Music","Sound"]
-                    text_box[0] = "Mod    Window" if st.full_on == 0 else "Mod    Window"
+                    text_box[0] = "Mod    Window" if st.full_on == 0 else "Mod    Fullscreen"
                     text_box[1] = "Music   " + str(st.music_volume)
                     text_box[2] = "Sound  " + str(st.sfx_volume)
+                    if st.lang == 1:
+                        text_box = ["화면","음악","소리"]
+                        text_box[0] = "화면    창모드" if st.full_on == 0 else "화면    전체화면"
+                        text_box[1] = "음악   " + str(st.music_volume)
+                        text_box[2] = "소리  " + str(st.sfx_volume)
                     for i in range(0,3):
-                        text_color = (255,0,255) if i == sv.curser else (0,0,255)
+                        text_color = (255,0,255) if i == sv.curser else (255,255,255)
                         text1 = score_font.render(text_box[i], True, text_color)
                         render_layer.blit(text1,(200,100+40*i))                    
             if sv.frame_count > 0:

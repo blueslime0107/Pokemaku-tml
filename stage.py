@@ -1,4 +1,3 @@
-from numpy import s_
 import start as st
 from start import WIDTH,HEIGHT, bg_image, pokemons,BGM1,BGM2,BGM3,BGM4,BGM5,BGM6,BGM7,BGM8,BGM9,BGM10 
 from spec_func import *
@@ -37,9 +36,11 @@ def end_challenge(time):
             lines = t.readlines()
             for line in lines:
                 line = line.strip()
-                line = line.split('_')
-                st.score_index.append([int(line[0]),int(line[1])])
-                st.score_value.append(int(line[2]))
+                if not line == "":
+                    line = line.split('_')
+                    st.score_index.append([int(line[0]),int(line[1])])
+                    st.score_value.append(int(line[2]))
+                else: pass
             
         sv.pause_lock = True
         sv.pause = True  
@@ -164,9 +165,8 @@ def boss_attack(num,count,pos,ready,boss):
     if boss.code == 2:
         pos = set_bossmove_point((WIDTH-150,HEIGHT//2-50),60,3,boss)
     if ready:
-        #if sv.levelup:count = boss_levelup(num,pos,boss,count)
-        #else:count = boss_file(num,pos,boss,count)
-        count = boss_file(num,pos,boss,count)
+        if sv.levelup:count = boss_levelup(num,pos,boss,count)
+        else:count = boss_file(num,pos,boss,count)
     if ready:pos = go_boss(boss)
     else:pos = calculate_new_xy(pos,boss.move_speed,boss.move_dir)
     return count,pos,ready

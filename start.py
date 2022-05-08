@@ -1,6 +1,48 @@
+from cgi import test
 import pygame
 from pygame.locals import *
 import time
+from tkinter import *
+import tkinter.font as tkFont
+
+root = Tk()
+root.title("language")
+
+w = 200 # width for the Tk root
+h = 200 # height for the Tk root
+
+# get screen width and height
+ws = root.winfo_screenwidth() # width of the screen
+hs = root.winfo_screenheight() # height of the screen
+
+# calculate x and y coordinates for the Tk root window
+x = (ws/2) - (w/2)
+y = (hs/2) - (h/2)
+
+# set the dimensions of the screen 
+# and where it is placed
+root.geometry('%dx%d+%d+%d' % (w, h, x, y))
+
+
+testfont = tkFont.Font(family="Arial", size=16, weight="bold")
+root.resizable(False, False)
+
+label = Label(root, text = "language", font=testfont)
+label.pack()
+
+lang_var = IntVar()
+button_kor = Radiobutton(root, text="한국어", value=1, variable=lang_var, height=2, font=testfont)
+button_kor.invoke()
+button_eng = Radiobutton(root, text="English", value=2, variable=lang_var, height=2,font=testfont)
+button_kor.pack()
+button_eng.pack()
+
+button = Button(root, text="▶", command=root.quit, font=testfont)
+button.pack()
+
+root.mainloop()
+
+
 
 pygame.init()
 pygame.mixer.pre_init(44100,-16,2,512)
@@ -14,6 +56,7 @@ skill_surface = pygame.Surface((WIDTH,HEIGHT), SRCALPHA)
 screen = pygame.display.set_mode((WIDTH*2,HEIGHT*2))
 monitor_size = [pygame.display.Info().current_w, pygame.display.Info().current_h]
 screen_rect = render_layer.get_rect()
+lang = lang_var.get()
 bgm_num = 0
 # 소리 초기설정, 불러오기
 pygame.mixer.set_num_channels(64)
@@ -35,11 +78,19 @@ title_img = pygame.image.load('resources\Image\\title.png').convert_alpha()
 poligon = pygame.image.load('resources\Image\polligonz.png').convert_alpha()
 screen.blit(pygame.transform.scale2x(loding_img),(0,0))
 pygame.display.flip()
-text_text = "resources\how_to_play.txt"
+text_text = ""
 text_credit = "resources\credit.txt"
-pkm_text = "resources\kor_pk_name.txt"
-other_txt = "resources\kor_other.txt"
 
+pkm_text = ""
+other_txt = ""
+if lang == 1:
+    pkm_text = "resources\kor_pk_name.txt"
+    other_txt = "resources\kor_other.txt"
+    text_text = "resources\kor_how_to_play.txt"
+if lang == 2:
+    pkm_text = "resources\pk_name.txt"
+    other_txt = "resources\other.txt"
+    text_text = "resources\how_to_play.txt"
 score_text = "resources\score.txt"
 score_index = []
 score_value = []
@@ -47,9 +98,11 @@ with open(score_text, "r", encoding="UTF-8") as t:
     lines = t.readlines()
     for line in lines:
         line = line.strip()
-        line = line.split('_')
-        score_index.append([int(line[0]),int(line[1])])
-        score_value.append(int(line[2]))
+        if not line == "":
+            line = line.split('_')
+            score_index.append([int(line[0]),int(line[1])])
+            score_value.append(int(line[2]))
+        else: pass
 htp_scroll = []
 with open(text_text, "r", encoding="UTF-8") as t:
     lines = t.readlines()
@@ -254,7 +307,8 @@ bullets[18].append(image)
 image = pygame.Surface((128, 128), pygame.SRCALPHA)
 bullets[19].append(image)
 
-
+pokeball = pygame.Surface((48, 16), pygame.SRCALPHA)
+pokeball.blit(item_img,(0,0),(64,0,48,16))
 
 
 cur_list = []
@@ -374,9 +428,14 @@ for i in range(0,1):
     image.blit(bullet_image,(0,0),(128,128,64,64))
     for j in range(0,90):
         image2 = pygame.transform.rotate(image, j*2)  
+        image3 = pygame.transform.rotate(image, -j*2)  
         rect = image2.get_rect() 
         pygame.draw.circle(image2 , (200,100,100),rect.center, 4)
         pygame.draw.circle(image2 , (255,255,255),rect.center, 3)     
+        rect3 = image3.get_rect() 
+        pygame.draw.circle(image3 , (200,100,100),rect3.center, 4)
+        pygame.draw.circle(image3 , (255,255,255),rect3.center, 3) 
+        image2.blit(image3,(0,0))
         cur_list.append(image2)
 slow_player_circle = cur_list
 cur_list = []
